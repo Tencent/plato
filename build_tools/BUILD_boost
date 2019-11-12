@@ -1,0 +1,470 @@
+cc_library (
+    name = "boost_include",
+    srcs = [ ],
+    hdrs = glob([
+        "include/**/*.hpp",
+        "include/**/*.h",
+        "include/**/*.ipp",
+    ]),
+    copts = [ ],
+    includes = ['./include'],
+    linkopts = ['-lpthread'],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "boost_date_time",
+    srcs = [
+        "lib/libboost_date_time.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "boost_filesystem",
+    srcs = [
+        "lib/libboost_filesystem.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ":boost_system",
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "boost_iostreams",
+    srcs = [
+        "lib/libboost_iostreams.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+        '-lz',
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_c99",
+    srcs = [
+        "lib/libboost_math_c99.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_c99f",
+    srcs = [
+        "lib/libboost_math_c99f.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_c99l",
+    srcs = [
+        "lib/libboost_math_c99l.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_tr1",
+    srcs = [
+        "lib/libboost_math_tr1.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_tr1f",
+    srcs = [
+        "lib/libboost_math_tr1f.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_math_tr1l",
+    srcs = [
+        "lib/libboost_math_tr1l.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_prg_exec_monitor",
+    srcs = [
+        "lib/libboost_prg_exec_monitor.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_program_options",
+    srcs = [
+        "lib/libboost_program_options.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_random",
+    srcs = [
+        "lib/libboost_random.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_regex",
+    srcs = [
+        "lib/libboost_regex.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_serialization",
+    srcs = [
+        "lib/libboost_serialization.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_signals",
+    srcs = [
+        "lib/libboost_signals.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_system",
+    srcs = [
+        "lib/libboost_system.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_test_exec_monitor",
+    srcs = [
+        "lib/libboost_test_exec_monitor.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_thread",
+    srcs = [
+        "lib/libboost_thread.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ":boost_system",
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_unit_test_framework",
+    srcs = [
+        "lib/libboost_unit_test_framework.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_wave",
+    srcs = [
+        "lib/libboost_wave.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_wserialization",
+    srcs = [
+        "lib/libboost_wserialization.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_timer",
+    srcs = [
+        "lib/libboost_timer.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_chrono",
+    srcs = [
+        "lib/libboost_chrono.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_library(
+    name = "boost_context",
+    srcs = [
+        "lib/libboost_context.a",
+    ],
+    hdrs = [
+    ],
+    includes = ['./include'],
+    deps = [
+        ':boost_include',
+    ],
+    copts = [
+    ],
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+

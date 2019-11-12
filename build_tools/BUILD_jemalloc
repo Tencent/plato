@@ -1,0 +1,14 @@
+cc_library (
+    name = "jemalloc",
+    hdrs = [],
+    srcs = [
+        "lib/libjemalloc.a"
+    ],
+    #strip_include_prefix = "include",
+    linkopts = [
+        "-lpthread",
+        "-ldl",
+    ],
+    visibility = ["//visibility:public"],
+)
+

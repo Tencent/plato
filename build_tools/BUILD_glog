@@ -1,0 +1,13 @@
+cc_library (
+    name = "glog",
+    hdrs = glob(["include/glog/*.h"]),
+    srcs = [
+        "lib/libglog.a"
+    ],
+    strip_include_prefix = "include",
+    linkopts = [
+        "-lpthread",
+    ],
+    visibility = ["//visibility:public"],
+)
+

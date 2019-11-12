@@ -1,0 +1,13 @@
+cc_library (
+    name = "gflags",
+    hdrs = glob(["include/gflags/*.h"]),
+    srcs = [
+        "lib/libgflags.a"
+    ],
+    strip_include_prefix = "include",
+    linkopts = [
+        "-lpthread",
+    ],
+    visibility = ["//visibility:public"],
+)
+

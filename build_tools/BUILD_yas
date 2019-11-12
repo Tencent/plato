@@ -1,0 +1,11 @@
+cc_library (
+    name = "yas",
+    srcs = [ ],
+    hdrs = glob([
+        "include/**/*.hpp",
+    ]),
+    strip_include_prefix = "include",
+    copts = [ '-O2', '-Wall', '-std=c++11' ],
+    visibility = ["//visibility:public"],
+)
+
