@@ -17,7 +17,7 @@
 	* [Node2Vec-Randomwalk](../example/node2vec_randomwalk.cc)
 	* [Metapath-Randomwalk](../example/metapath_randomwalk.cc)
 * 聚类/分圈算法
-  * [ConnectedComponents](../example/cgm_simple.cc)
+	* [ConnectedComponents](../example/cgm_simple.cc)
 	* [FastUnfolding](../example/fast_unfolding_simple.cc)
 * 其他图相关算法
 	* [BFS](../example/bfs.cc)

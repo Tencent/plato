@@ -1,6 +1,6 @@
 # Plato(柏拉图)
 
-**A framework for distributed graph computation and machine learning at wechat scale, for more details, see [柏拉图简介]().**
+**A framework for distributed graph computation and machine learning at wechat scale, for more details, see [柏拉图简介](doc/introduction.md).**
 
 Authors(In alphabetical order):  Benli Li, Conghui He, Donghai Yu, Pin Gao, Shijie Sun, Wenqiang Wu, Wanjing Wei, Xing Huang, Xiaogang Tu, Yongan Li.
 
@@ -52,7 +52,6 @@ A sample submit script was locate in [here](./scripts/run_pagerank.sh), modify i
 
 ## Documents
 
-* [性能测试](./doc/Benchmarks.md)
 * [支持算法列表](./doc/ALGOs.md)
 * [集群资源配置建议](./doc/Resources.md)
 
