@@ -10,7 +10,7 @@ Graphs, as an efficient method for representing and analyzing big data, has beco
 
 Graph data is high-dimensional, the performance of graph algorithms is one of the most decisive factor of the success of a graph processing/mining system. For Tencent, who has several billion-node large-scale social networks, performance is extremely important. However, most distributed graph computing frameworks, be them industrial level or academic research projects, cannot meet Tencent's requirement of high-performance. Several fundamental statistical attributes of social networks in Tencent cannot be achieved with constrained computing resource and time.
 
-Tencent Graph Computing (TGraph) has integrated Tencent's internal computing resource, and is committed to build the state-of-the-art ultra-large-scale graph computing platform in the industry. For social networks with billions of nodes, TGraph's own high-performance graph computing framework Plato reduces the computing time from days to minutes, with order-of-magnitude performance increase. This not only achieves the state-of-the-art performance, but also breaks the bottleneck of computing resource: instead of several hundreds servers, Plato can finish its tasks on as little as ten servers. Plato has started serving several core businesses internally at Tencent, and has created great business value.
+Tencent Graph Computing (TGraph) has integrated Tencent's internal computing resource, and is committed to build the state-of-the-art ultra-large-scale graph computing platform in the industry. For social networks with billions of nodes, TGraph's own high-performance graph computing framework Plato reduces the computing time from days to minutes, with order-of-magnitude performance increase. This not only achieves the state-of-the-art performance, but also breaks the bottleneck of computing resource: instead of several hundreds servers, Plato can finish its tasks on as little as ten servers. Plato has started serving several core businesses including WeChat internally at Tencent, and has created great business value.
 
 ## Overview
 
@@ -32,7 +32,7 @@ Plato framework's architecture overview is shown as below (Legend in Chinese). P
 
 The core of Plato is its adaptive graph computing engine. Currently, for different graph algorithms, Plato offers sparse-dense adaptive computing mode, shared-memory computing mode, and pipeline-based computing mode. It also has well-designed interface for new computing and communication modes support. Besides, the adaptive graph computing engine also contains graph partitioning, graph representation, and multi-level computing communication cooperative scheduling modules.
 
-On top of our graph computing engine, Plato offers multi-level interfaces for algorithm developers of different businesses: from low-level API, to graph algorithm library, to "solutions" customized for specific business: graph computing toolbox. Through these application-level interfaces and tools, Plato can integrate offline computing results with other machine learning algorithms, so as to support a variety of businesses on top.
+On top of our graph computing engine, Plato offers multi-level interfaces for algorithm developers of different businesses: from low-level API, to graph algorithm library, to "solutions" customized for specific business: graph computing toolset. Through these application-level interfaces and tools, Plato can integrate offline computing results with other machine learning algorithms, so as to support a variety of businesses on top.
 
 Open sourced algorithms:
 
@@ -72,10 +72,10 @@ Algorithms to open source:
 
 ## Performance Analysis
 
-**Plato's performance is better than any other mainstream distributed graph computing framework**. The following graph compares Plato and Spark GraphX on two benchmarks: PageRank and LPA. The reason we pick these two algorithms is that they are natively provided by other frameworks and thus can be considered to have the optimal implementation. The results show a 10x to 100x performance boost between Spark GraphX and Plato.
+**Plato's performance is better than any other mainstream distributed graph computing framework**. The following graph compares Plato and Spark GraphX on two benchmarks: PageRank and LPA. Note that we only show two representative benchmarks, performance comparisons for other graph algorithms show similar pattern with these two. The results show a 10x to 100x performance boost between Spark GraphX and Plato.
 
-apart from performance, another major factor that limits ultra-large-scale graph computing is huge memory consumption. One of Plato's advantages is its minimal memory consumption. The following graph shows that Plato consumes 10x to 100x smaller memory compared to Spark GraphX, which creates a massive space for algorithmically and engineering innovation with the saved memory.
+Apart from performance, another major factor that limits ultra-large-scale graph computing is huge memory consumption. One of Plato's advantages is its minimal memory consumption. The following graph shows that Plato consumes 10x to 100x smaller memory compared to Spark GraphX, which creates a massive space for algorithmically and engineering innovation with the saved memory.
 ![perf_sparkx](images/performance-sparkx.png)
 
-Plato also has extraordinary performance in algorithms for real-world businesses. Performed on Tencent-scale data, Plato achieves high-performance. The following graph shows Plato's running time (in minutes) for typical internal algorithms such as PageRank, Node2Vec, Randomwalk, and Mutual X computing, with Tencent-scale data.
+Plato also has extraordinary performance in algorithms for real-world businesses. Performed on Tencent-scale data, Plato achieves high-performance. The following graph shows Plato's running time (in minutes) for typical internal algorithms such as Mutual X Computing, Node2Vec, LINE, and GraphSAGE, with Tencent-scale data.
 ![perf](images/performance.png)
