@@ -76,10 +76,10 @@ Plato高性能图计算框架的核心是Plato自适应图计算引擎。目前P
 ## 性能对比
 
 Plato的计算性能遥遥领先于主流的分布式图计算框架。下图是Plato与Spark GraphX在PageRank和LPA这两个benchmark算法的性能对比。选用这两个算法是因为其他图计算框架自带了这些算法的实现，可认为这都是最优的实现，是较为公平的比较。从下图可以看到，Plato的性能比Spark GraphX高出1-2个数量级。
-![待补充性能数据](images/performance-sparkx.png)
 
 除了计算性能不足，内存占用过大也是限制大规模图计算的主要因素。Plato的另一个巨大优势则是他的内存开销远小于主流图计算框架。从下图看到，Plato的内存消耗比Spark GraphX减少了1-2个数量级，为超大规模图计算创造了更大的想象空间。
-![待补充性能数据](images/memory.png)
+![perf-sparkx](images/performance-sparkx.png)
 
 Plato不仅在benchmark算法中独树一帜，在真实的业务算法中也同样成效卓著。在腾讯数据量级下，Plato的计算性能也非常优秀。下图给出了Plato在腾讯数据量级下的PageRank、Node2Vec Randomwalk、共同类计算等典型业务算法的性能。
-![待补充性能数据](images/performance.png)
+![perf](images/performance.png)
+
