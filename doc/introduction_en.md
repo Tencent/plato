@@ -73,10 +73,9 @@ Algorithms to open source:
 ## Performance Analysis
 
 **Plato's performance is better than any other mainstream distributed graph computing framework**. The following graph compares Plato and Spark GraphX on two benchmarks: PageRank and LPA. The reason we pick these two algorithms is that they are natively provided by other frameworks and thus can be considered to have the optimal implementation. The results show a 10x to 100x performance boost between Spark GraphX and Plato.
-![perf_sparkx](images/performance-sparkx.png)
 
 apart from performance, another major factor that limits ultra-large-scale graph computing is huge memory consumption. One of Plato's advantages is its minimal memory consumption. The following graph shows that Plato consumes 10x to 100x smaller memory compared to Spark GraphX, which creates a massive space for algorithmically and engineering innovation with the saved memory.
-![memory](images/memory.png)
+![perf_sparkx](images/performance-sparkx.png)
 
 Plato also has extraordinary performance in algorithms for real-world businesses. Performed on Tencent-scale data, Plato achieves high-performance. The following graph shows Plato's running time (in minutes) for typical internal algorithms such as PageRank, Node2Vec, Randomwalk, and Mutual X computing, with Tencent-scale data.
 ![perf](images/performance.png)
