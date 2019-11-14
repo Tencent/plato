@@ -68,7 +68,7 @@ function install {
   
   pushd glog-0.4.0
   clean_exec ./autogen.sh
-  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --enable-shared=yes --enable-static=yes --prefix=${rootdir}/3rd/glog-0.4.0
+  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --enable-shared=yes --enable-static=yes --prefix=${rootdir}/3rd/glog-0.4.0 --with-gflags=${rootdir}/3rd/gflags
   clean_exec GFLAGS_LIBS='' make
   clean_exec make install
   popd
