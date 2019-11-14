@@ -53,4 +53,4 @@ A sample submit script was locate in [here](./scripts/run_pagerank.sh), modify i
 ## Documents
 
 * [支持算法列表](./doc/ALGOs.md)
-* [集群资源配置建议](./doc/Resources.md) | [Notes on Resource Assignment](./doc/Resource_en.md)
+* [集群资源配置建议](./doc/Resources.md) | [Notes on Resource Assignment](./doc/Resources_en.md)
