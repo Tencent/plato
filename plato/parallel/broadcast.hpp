@@ -275,7 +275,7 @@ int broadcast (
   std::thread recv_thread ([&](void) {
     #pragma omp parallel num_threads(opts.threads_)
     {
-      auto yeild = [&](bool inc, bool should_sleep) {
+      auto yield = [&](bool inc, bool should_sleep) {
         if (inc) { ++cpus; }
 
         if (should_sleep) {
@@ -318,16 +318,16 @@ int broadcast (
 
       uint32_t idles = 0;
 
-      yeild(false, true);
+      yield(false, true);
       before_recv_task();
       while (process_continue) {
         idles += (uint32_t)(false == probe_once(opts.batch_size_));
 
         if (idles > 3) {
-          yeild(true, true);
+          yield(true, true);
           idles = 0;
         } else {
-          yeild(true, false);
+          yield(true, false);
         }
       }
       after_recv_task();
@@ -423,7 +423,7 @@ int broadcast (
   {
     oarchive_spec_t oarchive(16 * PAGESIZE);
 
-    auto yeild = [&](bool should_sleep) {
+    auto yield = [&](bool should_sleep) {
       ++cpus;
 
       if (should_sleep) {
@@ -452,10 +452,10 @@ int broadcast (
       while (0 == global_sndbuf_list.size()) {  // wait for available slots
         buflck.unlock();
         if (++idles > 3) {
-          yeild(true);
+          yield(true);
           idles = 0;
         } else {
-          yeild(false);
+          yield(false);
         }
         buflck.lock();
       }
