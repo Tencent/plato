@@ -6,6 +6,8 @@ Authors(In alphabetical order):  Benli Li, Conghui He, Donghai Yu, Pin Gao, Shij
 
 Contact: plato@tencent.com
 
+Special thanks to [Xiaowei Zhu](https://coolerzxw.github.io/) and many for their work [Gemini](https://coolerzxw.github.io/data/publications/gemini_osdi16.pdf) which served as an inspiration and guide in building plato‘s [dualmode-engine](./plato/engine/dualmode.hpp). Thanks to Ke Yang and many for their work [KnightKing](https://dl.acm.org/citation.cfm?id=3359634) which served as foundation of plato's [walk-engine](plato/engine/walk.hpp).
+
 ## Dependencies
 
 To simplify installation, Plato currently downloads and builds most of its required dependencies by calling `3rdtools.sh`. You should call it at least once before any build operations.
@@ -54,3 +56,4 @@ A sample submit script was locate in [here](./scripts/run_pagerank.sh), modify i
 
 * [支持算法列表](./doc/ALGOs.md)
 * [集群资源配置建议](./doc/Resources.md) | [Notes on Resource Assignment](./doc/Resources_en.md)
+

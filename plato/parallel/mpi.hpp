@@ -1,4 +1,19 @@
 /*
+Copyright (c) 2015-2016 Xiaowei Zhu, Tsinghua University
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+   
+
   Tencent is pleased to support the open source community by making
   Plato available.
   Copyright (C) 2019 THL A29 Limited, a Tencent company.
@@ -65,42 +80,6 @@ MPI_Datatype get_mpi_data_type() {
     CHECK(false) << "type not supported";
   }
 }
-
-// class mpi_instance_t {
-// public:
-//   int partition_id_;
-//   int partitions_;
-// 
-//   mpi_instance_t (int* argc, char*** argv) {
-//     int provided;
-//     MPI_Init_thread(argc, argv, MPI_THREAD_MULTIPLE, &provided);
-// 
-//     MPI_Comm_rank(MPI_COMM_WORLD, &partition_id_);
-//     MPI_Comm_size(MPI_COMM_WORLD, &partitions_);
-// 
-//     if (0 == partition_id_) {
-//       LOG(INFO) << "thread support level provided by MPI: ";
-//       switch (provided) {
-//       case MPI_THREAD_MULTIPLE:
-//         LOG(INFO) << "MPI_THREAD_MULTIPLE";
-//         break;
-//       case MPI_THREAD_SERIALIZED:
-//         LOG(INFO) << "MPI_THREAD_SERIALIZED";
-//         break;
-//       case MPI_THREAD_FUNNELED:
-//         LOG(INFO) << "MPI_THREAD_FUNNELED";
-//         break;
-//       case MPI_THREAD_SINGLE:
-//         LOG(INFO) << "MPI_THREAD_SINGLE";
-//         break;
-//       default:
-//         CHECK(false);
-//       }
-//     }
-//   }
-// 
-//   ~mpi_instance_t() { MPI_Finalize(); }
-// };
 
 }
 
