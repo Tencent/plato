@@ -84,61 +84,69 @@ struct sample_traits<false, STORAGE> {
     __sampler_t(STORAGE* storage) : storage_(storage), length_(storage->edges()), probs_(new block_t[length_]) {
       auto storage_index = storage->index();
       auto storage_adjs  = storage->adjs();
+      size_t type_counts = 1;
+      CHECK((std::is_same<STORAGE, plato::hnbbcsr_t<typename STORAGE::edata_t, typename STORAGE::partition_t>>::value) || \
+          (std::is_same<STORAGE, plato::cbcsr_t<typename STORAGE::edata_t, typename STORAGE::partition_t>>::value));
+
+      type_counts = storage_->type_counts();
       for(size_t i = 0; i < (size_t)storage->non_zero_lines(); ++i) {
-        eid_t start = storage_index.get()[i];
-        eid_t end   = storage_index.get()[i + 1];
-        float probs_sum = 0;
-        eid_t len = end - start;
-        eid_t small_count = 0;
-        eid_t large_count = 0;
-        std::unique_ptr<float>  norm_probs(new float[len]);
-        std::unique_ptr<eid_t> large(new eid_t[len]);
-        std::unique_ptr<eid_t> small(new eid_t[len]);
-        for(eid_t j = start; j < end; ++j) {
-          auto& nei = storage_adjs.get()[j];
-          probs_sum += nei.edata_;
-        }
-
-        for(eid_t j = start; j < end; ++j) {
-          auto& nei = storage_adjs.get()[j];
-          norm_probs.get()[j - start] = nei.edata_ * len / probs_sum;
-        }
-
-        for (eid_t j = start; j < end; ++j) {
-          eid_t offset = j - start;
-          if (norm_probs.get()[offset] < 1.0) {
-            small.get()[small_count++] = offset;
-          } else {
-            large.get()[large_count++] = offset;
+        for(size_t t = 0; t < type_counts; ++t) {
+          size_t section = i * type_counts + t;
+          eid_t start = storage_index.get()[section];
+          eid_t end   = storage_index.get()[section + 1];
+          float probs_sum = 0;
+          eid_t len = end - start;
+          eid_t small_count = 0;
+          eid_t large_count = 0;
+          std::unique_ptr<float>  norm_probs(new float[len]);
+          std::unique_ptr<eid_t> large(new eid_t[len]);
+          std::unique_ptr<eid_t> small(new eid_t[len]);
+          for(eid_t j = start; j < end; ++j) {
+            auto& nei = storage_adjs.get()[j];
+            probs_sum += nei.edata_;
           }
-        }
 
-        while (small_count && large_count) {
-          eid_t small_idx = small.get()[--small_count];
-          eid_t large_idx = large.get()[--large_count];
+          for(eid_t j = start; j < end; ++j) {
+            auto& nei = storage_adjs.get()[j];
+            norm_probs.get()[j - start] = nei.edata_ * len / probs_sum;
+          }
 
-          probs_.get()[start + small_idx].prob_  = norm_probs.get()[small_idx];
-          probs_.get()[start + small_idx].alias_ = large_idx;
+          for (eid_t j = start; j < end; ++j) {
+            eid_t offset = j - start;
+            if (norm_probs.get()[offset] < 1.0) {
+              small.get()[small_count++] = offset;
+            } else {
+              large.get()[large_count++] = offset;
+            }
+          }
+
+          while (small_count && large_count) {
+            eid_t small_idx = small.get()[--small_count];
+            eid_t large_idx = large.get()[--large_count];
+
+            probs_.get()[start + small_idx].prob_  = norm_probs.get()[small_idx];
+            probs_.get()[start + small_idx].alias_ = large_idx;
   
-          norm_probs.get()[large_idx] = norm_probs.get()[large_idx] - (1.0 - norm_probs.get()[small_idx]);
+            norm_probs.get()[large_idx] = norm_probs.get()[large_idx] - (1.0 - norm_probs.get()[small_idx]);
 
-          if (norm_probs.get()[large_idx] < 1.0) {
-            small.get()[small_count++] = large_idx;
-          } else {
-            large.get()[large_count++] = large_idx;
+            if (norm_probs.get()[large_idx] < 1.0) {
+              small.get()[small_count++] = large_idx;
+            } else {
+              large.get()[large_count++] = large_idx;
+            }
           }
-        }
 
-        while (large_count) {
-          eid_t idx = large.get()[--large_count];
-          probs_.get()[start + idx].prob_  = 1.0;
-          probs_.get()[start + idx].alias_ = idx;
-        }
+          while (large_count) {
+            eid_t idx = large.get()[--large_count];
+            probs_.get()[start + idx].prob_  = 1.0;
+            probs_.get()[start + idx].alias_ = idx;
+          }
 
-        while (small_count) {  // can this happen ??
-          eid_t idx = small.get()[--small_count];
-          probs_.get()[start + idx].prob_  = 1.0;
-          probs_.get()[start + idx].alias_ = idx;
+          while (small_count) {  // can this happen ??
+            eid_t idx = small.get()[--small_count];
+            probs_.get()[start + idx].prob_  = 1.0;
+            probs_.get()[start + idx].alias_ = idx;
+          }
         }
       }
     }
