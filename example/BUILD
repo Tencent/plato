@@ -5,7 +5,7 @@ cc_binary (
     srcs = [
         "bitmap_scan.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -22,7 +22,7 @@ cc_binary (
     srcs = [
         "function_call.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -38,7 +38,7 @@ cc_binary (
     srcs = [
         "graph_load.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -153,7 +153,7 @@ cc_binary (
     srcs = [
         "bfs_simple.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -216,7 +216,7 @@ cc_binary (
     srcs = [
         "node2vec_randomwalk.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -239,7 +239,7 @@ cc_binary (
     srcs = [
         "metapath_randomwalk.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
