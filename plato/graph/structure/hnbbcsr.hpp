@@ -229,6 +229,12 @@ public:
    */
   vid_t max_vid(void)        { return max_vid_;       }
 
+  /**
+   * @brief getter
+   * @return
+   */
+  size_t type_counts(void)   { return type_count_;    }
+
 protected:
 
   using bitmap_allocator_t = typename traits_::template rebind_alloc<bitmap_spec_t>;
@@ -413,7 +419,7 @@ int hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(vid_t vertices, vid_
 
   vid_t non_zero_lines = bitmap_->count();
   non_zero_lines_ = non_zero_lines;
-  bucket_size_ = (max_vid_ + 1 + non_zero_lines) / non_zero_lines;  //Set the bucket size to total rows divided by non-zero rows
+  bucket_size_ = (((uint64_t)max_vid_ + 1UL + non_zero_lines) / non_zero_lines);        //Set the bucket size to total rows divided by non-zero rows
   vid_t bucket_num = (vid_t)(((uint64_t)max_vid_ + 1UL + bucket_size_) / bucket_size_); //The number of buckets
 
   vid_t tmp_bucket_num = bucket_num;

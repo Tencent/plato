@@ -208,6 +208,12 @@ public:
    * @return max_vid_ ref
    */
   vid_t max_vid(void)        { return max_vid_;        }
+  
+  /**
+   * @brief type_counts getter
+   * @return 1
+   */
+  size_t type_counts(void)   { return 1;               }
 
   /**
    * @brief get_random_edge
@@ -377,8 +383,8 @@ int cbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(
 
   vid_t non_zero_lines = bitmap_->count();
   non_zero_lines_ = non_zero_lines;
-  bucket_size_ = (max_vid_ + 1 + non_zero_lines) / non_zero_lines;  //Set the bucket size to total rows divided by non-zero rows
-  vid_t bucket_num = (vid_t)(((uint64_t)max_vid_ + 1UL + bucket_size_) / bucket_size_); //The number of buckets
+  bucket_size_ = (vid_t)(((uint64_t)max_vid_ + 1UL + non_zero_lines) / non_zero_lines);  //Set the bucket size to total rows divided by non-zero rows
+  vid_t bucket_num = (vid_t)(((uint64_t)max_vid_ + 1UL + bucket_size_) / bucket_size_);  //The number of buckets
   vid_t tmp_bucket_num = bucket_num;
   vid_t tmp_non_zero_lines = non_zero_lines;
   watch.mark("t5");
