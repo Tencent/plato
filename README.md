@@ -6,7 +6,7 @@ Authors(In alphabetical order):  Benli Li, Conghui He, Donghai Yu, Pin Gao, Shij
 
 Contact: plato@tencent.com
 
-Special thanks to [Xiaowei Zhu](https://coolerzxw.github.io/) and many for their work [Gemini](https://coolerzxw.github.io/data/publications/gemini_osdi16.pdf) which served as an inspiration and guide in building plato‘s [dualmode-engine](./plato/engine/dualmode.hpp). Thanks to Ke Yang and many for their work [KnightKing](https://dl.acm.org/citation.cfm?id=3359634) which served as foundation of plato's [walk-engine](plato/engine/walk.hpp).
+Special thanks to [Xiaowei Zhu](https://coolerzxw.github.io/) and many for their work [Gemini](https://coolerzxw.github.io/data/publications/gemini_osdi16.pdf). Several basic utility functions in Plato is derived from Gemini, the design principle of some dual-mode based algorithms in Plato is also heavily influenced by Gemini's dualmode-engine. Thanks to Ke Yang and many for their work [KnightKing](https://dl.acm.org/citation.cfm?id=3359634) which served as foundation of plato's [walk-engine](plato/engine/walk.hpp).
 
 ## Dependencies
 
