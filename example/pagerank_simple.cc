@@ -93,24 +93,13 @@ int main(int argc, char** argv) {
   }
 
   watch.mark("t0");
-  {  // save result to hdfs
-    std::vector<std::unique_ptr<plato::hdfs_t::fstream>> fs_v(cluster_info.threads_);
-    std::vector<std::unique_ptr<boost::iostreams::filtering_stream<boost::iostreams::output>>>
-      fs_output_v(cluster_info.threads_);
-
-    for (int i = 0; i < cluster_info.threads_; ++i) {
-      fs_v[i].reset(new plato::hdfs_t::fstream(plato::hdfs_t::get_hdfs(FLAGS_output),
-          (boost::format("%s/%04d_%04d.csv.gz") % FLAGS_output.c_str() % cluster_info.partition_id_ % i).str(), true));
-
-      fs_output_v[i].reset(new boost::iostreams::filtering_stream<boost::iostreams::output>());
-      fs_output_v[i]->push(boost::iostreams::gzip_compressor());
-      fs_output_v[i]->push(*fs_v[i]);
-    }
+  {
+    plato::thread_local_fs_output os(FLAGS_output, (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
 
     ranks.foreach<int> (
       [&](plato::vid_t v_i, double* pval) {
-        static thread_local auto& fs_output = fs_output_v[omp_get_thread_num()];
-        *fs_output << v_i << "," << *pval << "\n";
+        auto& fs_output = os.local();
+        fs_output << v_i << "," << *pval << "\n";
         return 0;
       }
     );
