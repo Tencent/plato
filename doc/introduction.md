@@ -57,7 +57,6 @@ Plato高性能图计算框架的核心是Plato自适应图计算引擎。目前P
   + [x] Node2Vec-Randomwalk
   + [x] Metapath-Randomwalk
 - [x] 聚类/分圈算法
-  + [x] LDA
   + [x] FastUnfolding
 - [x] 其他图相关算法
   + [x] BFS
