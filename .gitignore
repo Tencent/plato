@@ -45,7 +45,7 @@ CMakeLists.txt
 3rd/sparsehash-2.0.3/
 3rd/jemalloc
 3rd/jemalloc-5.2.0/
-3rd/dlpack/
+3rd/dlpack
 3rd/dlpack-0.2/
 3rd/libunwind
 3rd/libunwind-1.3.1/
