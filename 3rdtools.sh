@@ -142,18 +142,19 @@ function install {
   clean_exec cp ../build_tools/BUILD_jemalloc ./jemalloc/BUILD
   popd
 
-  ## nlpack
-  DLPACK_VERSION='0.2'
-  if [ ! -f dlpack-${DLPACK_VERSION}.tar.gz  ]; then
-    clean_exec wget https://github.com/dmlc/dlpack/archive/v${DLPACK_VERSION}.tar.gz -O dlpack-${DLPACK_VERSION}.tar.gz
+  ## mpich
+  if [ ! -f mpich-3.2.1.tar.gz ]; then
+    clean_exec wget https://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
   fi
-  clean_exec tar vxzf dlpack-${DLPACK_VERSION}.tar.gz
-  pushd dlpack-${DLPACK_VERSION}
-  clean_exec mkdir -p ${rootdir}/3rd/dlpack-${DLPACK_VERSION}
-  clean_exec cp include ${rootdir}/3rd/dlpack-${DLPACK_VERSION}/ -R
+  clean_exec tar vxzf mpich-3.2.1.tar.gz
+  pushd mpich-3.2.1
+  clean_exec ./configure --with-pic --enable-static --disable-shared --disable-fortran --disable-mpi-fortran --enable-mpi-thread-mutliple --prefix=${rootdir}/3rd/mpich-3.2.1
+  clean_exec make -j$(nproc)
+  clean_exec make install
   popd
+
   pushd ${rootdir}/3rd
-  clean_exec ln -nsf dlpack-${DLPACK_VERSION} dlpack
+  clean_exec ln -nsf mpich-3.2.1 mpich
   popd
 
   popd
@@ -168,6 +169,7 @@ function distclean {
   clean_exec rm googletest googletest-release-1.8.1 -rf
   clean_exec rm yas yas-7.0.1 -rf
   clean_exec rm jemalloc jemalloc-5.2.0 -rf 
+  clean_exec rm mpich mpich-3.2.1 -rf 
   popd
 
   rm ${sourceroot} -rf
