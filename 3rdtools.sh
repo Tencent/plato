@@ -27,6 +27,7 @@ function install {
   if [ ! -f boost_1_68_0.tar.gz ]; then
     clean_exec wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
   fi
+  clean_exec rm -rf boost_1_68_0
   clean_exec tar vxzf boost_1_68_0.tar.gz
 
   pushd boost_1_68_0
@@ -43,6 +44,7 @@ function install {
   if [ ! -f v2.2.1.tar.gz ]; then
     clean_exec wget https://github.com/gflags/gflags/archive/v2.2.1.tar.gz
   fi
+  clean_exec rm -rf gflags-2.2.1
   clean_exec tar vxzf v2.2.1.tar.gz
 
   pushd gflags-2.2.1
@@ -63,6 +65,7 @@ function install {
   if [ ! -f libunwind-1.3.1.tar.gz ]; then
     clean_exec wget http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.3.1.tar.gz
   fi
+  clean_exec rm -rf libunwind-1.3.1
   clean_exec tar vxzf libunwind-1.3.1.tar.gz
 
   pushd libunwind-1.3.1
@@ -80,6 +83,7 @@ function install {
   if [ ! -f v0.4.0.tar.gz ]; then
     clean_exec wget https://github.com/google/glog/archive/v0.4.0.tar.gz
   fi
+  clean_exec rm -rf glog-0.4.0
   clean_exec tar vxzf v0.4.0.tar.gz
   
   pushd glog-0.4.0
@@ -98,7 +102,7 @@ function install {
   if [ ! -f release-1.8.1.tar.gz ]; then
     clean_exec wget https://github.com/google/googletest/archive/release-1.8.1.tar.gz
   fi
-  clean_exec tar vxzf release-1.8.1.tar.gz -C ${rootdir}/3rd 
+  clean_exec tar vxzf release-1.8.1.tar.gz -C ${rootdir}/3rd
   pushd ${rootdir}/3rd
   clean_exec ln -nsf googletest-release-1.8.1 googletest
   popd
@@ -117,7 +121,9 @@ function install {
   if [ ! -f sparsehash-2.0.3.tar.gz ]; then
     clean_exec wget https://github.com/sparsehash/sparsehash/archive/sparsehash-2.0.3.tar.gz
   fi
+  clean_exec rm -rf sparsehash-sparsehash-2.0.3
   clean_exec tar vxzf sparsehash-2.0.3.tar.gz
+
   pushd sparsehash-sparsehash-2.0.3
   clean_exec ./configure --prefix=${rootdir}/3rd/sparsehash-2.0.3
   clean_exec make
@@ -145,7 +151,9 @@ function install {
   if [ ! -f 5.2.0.tar.gz ]; then
     clean_exec wget https://github.com/jemalloc/jemalloc/archive/5.2.0.tar.gz
   fi
+  clean_exec rm -rf jemalloc-5.2.0
   clean_exec tar vxzf 5.2.0.tar.gz
+
   pushd jemalloc-5.2.0
   clean_exec ./autogen.sh
   clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --enable-shared=yes --enable-static=yes --prefix=${rootdir}/3rd/jemalloc-5.2.0
@@ -162,7 +170,9 @@ function install {
   if [ ! -f mpich-3.2.1.tar.gz ]; then
     clean_exec wget https://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
   fi
+  clean_exec rm -rf mpich-3.2.1
   clean_exec tar vxzf mpich-3.2.1.tar.gz
+
   pushd mpich-3.2.1
   clean_exec ./configure --with-pic --enable-static --disable-shared --disable-fortran --disable-mpi-fortran --enable-mpi-thread-mutliple --prefix=${rootdir}/3rd/mpich-3.2.1
   clean_exec make -j$(nproc)
