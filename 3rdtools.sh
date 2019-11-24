@@ -25,7 +25,7 @@ function install {
 
   ## boost
   if [ ! -f boost_1_68_0.tar.gz ]; then
-    clean_exec wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+    clean_exec wget -O boost_1_68_0.tar.gz https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
   fi
   clean_exec rm -rf boost_1_68_0
   clean_exec tar vxzf boost_1_68_0.tar.gz
@@ -41,11 +41,11 @@ function install {
   popd
 
   ## gflags
-  if [ ! -f v2.2.1.tar.gz ]; then
-    clean_exec wget https://github.com/gflags/gflags/archive/v2.2.1.tar.gz
+  if [ ! -f gflags-2.2.1.tar.gz ]; then
+    clean_exec wget -O gflags-2.2.1.tar.gz https://github.com/gflags/gflags/archive/v2.2.1.tar.gz
   fi
   clean_exec rm -rf gflags-2.2.1
-  clean_exec tar vxzf v2.2.1.tar.gz
+  clean_exec tar vxzf gflags-2.2.1.tar.gz
 
   pushd gflags-2.2.1
   mkdir -p build
@@ -80,11 +80,11 @@ function install {
   popd
 
   ## glog
-  if [ ! -f v0.4.0.tar.gz ]; then
-    clean_exec wget https://github.com/google/glog/archive/v0.4.0.tar.gz
+  if [ ! -f glog-0.4.0.tar.gz ]; then
+    clean_exec wget -O glog-0.4.0.tar.gz https://github.com/google/glog/archive/v0.4.0.tar.gz
   fi
   clean_exec rm -rf glog-0.4.0
-  clean_exec tar vxzf v0.4.0.tar.gz
+  clean_exec tar vxzf glog-0.4.0.tar.gz
   
   pushd glog-0.4.0
   clean_exec ./autogen.sh
@@ -99,19 +99,19 @@ function install {
   popd
 
   ## googletest
-  if [ ! -f release-1.8.1.tar.gz ]; then
-    clean_exec wget https://github.com/google/googletest/archive/release-1.8.1.tar.gz
+  if [ ! -f googletest-1.8.1.tar.gz ]; then
+    clean_exec wget -O googletest-1.8.1.tar.gz https://github.com/google/googletest/archive/release-1.8.1.tar.gz
   fi
-  clean_exec tar vxzf release-1.8.1.tar.gz -C ${rootdir}/3rd
+  clean_exec tar vxzf googletest-1.8.1.tar.gz -C ${rootdir}/3rd
   pushd ${rootdir}/3rd
   clean_exec ln -nsf googletest-release-1.8.1 googletest
   popd
 
   ## yas
-  if [ ! -f 7.0.2.tar.gz ]; then
-    clean_exec wget https://github.com/niXman/yas/archive/7.0.2.tar.gz
+  if [ ! -f yas-7.0.2.tar.gz ]; then
+    clean_exec wget -O yas-7.0.2.tar.gz https://github.com/niXman/yas/archive/7.0.2.tar.gz
   fi
-  clean_exec tar vxzf 7.0.2.tar.gz -C ${rootdir}/3rd
+  clean_exec tar vxzf yas-7.0.2.tar.gz -C ${rootdir}/3rd
   pushd ${rootdir}/3rd
   clean_exec ln -nsf yas-7.0.2 yas
   clean_exec cp ../build_tools/BUILD_yas ./yas/BUILD
@@ -119,7 +119,7 @@ function install {
 
   ## sparsehash
   if [ ! -f sparsehash-2.0.3.tar.gz ]; then
-    clean_exec wget https://github.com/sparsehash/sparsehash/archive/sparsehash-2.0.3.tar.gz
+    clean_exec wget -O sparsehash-2.0.3.tar.gz https://github.com/sparsehash/sparsehash/archive/sparsehash-2.0.3.tar.gz
   fi
   clean_exec rm -rf sparsehash-sparsehash-2.0.3
   clean_exec tar vxzf sparsehash-2.0.3.tar.gz
@@ -148,11 +148,11 @@ function install {
   # popd
 
   ## jemalloc
-  if [ ! -f 5.2.0.tar.gz ]; then
-    clean_exec wget https://github.com/jemalloc/jemalloc/archive/5.2.0.tar.gz
+  if [ ! -f jemalloc.5.2.0.tar.gz ]; then
+    clean_exec wget -O jemalloc.5.2.0.tar.gz https://github.com/jemalloc/jemalloc/archive/5.2.0.tar.gz
   fi
   clean_exec rm -rf jemalloc-5.2.0
-  clean_exec tar vxzf 5.2.0.tar.gz
+  clean_exec tar vxzf jemalloc.5.2.0.tar.gz
 
   pushd jemalloc-5.2.0
   clean_exec ./autogen.sh
@@ -168,7 +168,7 @@ function install {
 
   ## mpich
   if [ ! -f mpich-3.2.1.tar.gz ]; then
-    clean_exec wget https://github.com/pmodels/mpich/archive/v3.2.1.tar.gz
+    clean_exec wget -O mpich-3.2.1.tar.gz https://github.com/pmodels/mpich/archive/v3.2.1.tar.gz
   fi
   clean_exec rm -rf mpich-3.2.1
   clean_exec tar vxzf mpich-3.2.1.tar.gz
