@@ -50,7 +50,7 @@ function install {
   pushd gflags-2.2.1
   mkdir -p build
   pushd build
-  clean_exec CXXFLAGS="-fPIC" cmake .. -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=${rootdir}/3rd/gflags-2.2.1
+  clean_exec CXXFLAGS="-fPIC" cmake .. -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=${rootdir}/3rd/gflags-2.2.1
   clean_exec make
   clean_exec make install
   popd
@@ -88,7 +88,7 @@ function install {
   
   pushd glog-0.4.0
   clean_exec ./autogen.sh
-  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' LDFLAGS="-L${rootdir}/3rd/libunwind/lib" CPPFLAGS="-I${rootdir}/3rd/libunwind/include" ./configure --enable-shared=yes --enable-static=yes --prefix=${rootdir}/3rd/glog-0.4.0
+  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' LDFLAGS="-L${rootdir}/3rd/libunwind/lib" CPPFLAGS="-I${rootdir}/3rd/libunwind/include" ./configure --enable-shared=no --enable-static=yes --prefix=${rootdir}/3rd/glog-0.4.0
   clean_exec GFLAGS_LIBS='' make
   clean_exec make install
   popd
@@ -156,7 +156,7 @@ function install {
 
   pushd jemalloc-5.2.0
   clean_exec ./autogen.sh
-  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --enable-shared=yes --enable-static=yes --prefix=${rootdir}/3rd/jemalloc-5.2.0
+  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --enable-shared=no --enable-static=yes --prefix=${rootdir}/3rd/jemalloc-5.2.0
   clean_exec make
   clean_exec make install
   popd
