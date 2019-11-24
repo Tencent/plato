@@ -63,7 +63,7 @@ function install {
 
   ## libunwind
   if [ ! -f libunwind-1.3.1.tar.gz ]; then
-    clean_exec wget http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.3.1.tar.gz
+    clean_exec wget https://github.com/libunwind/libunwind/releases/download/v1.3.1/libunwind-1.3.1.tar.gz
   fi
   clean_exec rm -rf libunwind-1.3.1
   clean_exec tar vxzf libunwind-1.3.1.tar.gz
@@ -168,7 +168,7 @@ function install {
 
   ## mpich
   if [ ! -f mpich-3.2.1.tar.gz ]; then
-    clean_exec wget https://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
+    clean_exec wget https://github.com/pmodels/mpich/archive/v3.2.1.tar.gz
   fi
   clean_exec rm -rf mpich-3.2.1
   clean_exec tar vxzf mpich-3.2.1.tar.gz
