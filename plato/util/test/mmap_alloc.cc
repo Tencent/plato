@@ -51,17 +51,3 @@ TEST(MMAP_ALLOCATOR, VectorWithTrivialType) {
     ASSERT_THAT(vec, testing::Contains((int)i));
   }
 }
-
-TEST(MMAP_ALLOCATOR, VectorWithNonTrivialType) {
-  std::vector<int, plato::mmap_allocator_t<non_trivial_t>> vec;
-
-  for (int i = 0; i < 1033; ++i) {
-    vec.emplace_back(i);
-  }
-  ASSERT_EQ(vec.size(), 1033);
-
-  for (size_t i = 0; i < vec.size(); ++i) {
-    ASSERT_THAT(vec, testing::Contains((int)i));
-  }
-}
-
