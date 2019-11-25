@@ -1,2 +1,2 @@
-common --color=yes --verbose_failures --strip=never
+common --color=yes --verbose_failures --strip=never --curses=no
 test --test_output=errors --test_verbose_timeout_warnings
