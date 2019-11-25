@@ -3,7 +3,6 @@ MAINTAINER platoteam
 
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
-    yum update -y && \
     yum install -y sudo && \
     install-dependencies.sh && \
     yum clean all -y && \
