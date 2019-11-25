@@ -20,12 +20,14 @@ Build docker image
 How to use docker images.
 
 ```bash
-# cd to the project root directory.
-cd ..
+# start container under project root directory.
+# cd ..
+docker run -v $(pwd):/data -e USER_NAME=$(id -un) -e USER_ID=$(id -u) -it --rm platograph/plato-dev:centos.7
+# build 3td party libraries.
+./3rdtools.sh distclean
+./3rdtools.sh install
 # build && test.
-docker run -v $(pwd):/data -e USER_NAME=$(id -un) -e USER_ID=$(id -u) -it --rm platograph/plato-dev:centos.7 ./build.sh clean
-# test pagerank
-docker run -v $(pwd):/data -e USER_NAME=$(id -un) -e USER_ID=$(id -u) -it --rm platograph/plato-dev:centos.7 /data/3rd/mpich/bin/mpiexec.hydra -n 4 -hosts localhost -env LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/data/3rd/hadoop2/lib /data/bazel-bin/example/pagerank -input /data/data/graph/v100_e2150_ua_c3.csv -is_directed false -output /tmp
-# view the output files
-ls /tmp
+./build.sh
+# run pagerank.
+./scripts/run_pagerank_local.sh
 ```

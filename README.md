@@ -12,35 +12,33 @@ Special thanks to [Xiaowei Zhu](https://coolerzxw.github.io/) and many for their
 
 ## Dependencies
 
-To simplify installation, Plato currently downloads and builds most of its required dependencies by calling `3rdtools.sh`. You should call it at least once before any build operations.
+To simplify installation, Plato currently downloads and builds most of its required dependencies by calling following commands. You should call it at least once before any build operations.
 
-There are however, a few dependencies which must be manually satisfied.
-
-* GCC
-  * At least 4.8.5 for C++11 support.
-* MPICH-3
-	* Required for compiling and run Plato.
-* OpenMP
-	* Required for compiling and run Plato.
-* Bazel-0.26
-  * Required for compiling.
+```bash
+# install compile dependencies.
+sudo ./docker/install-dependencies.sh
+# download and build staticlly linked libraries.
+./3rdtools.sh distclean && ./3rdtools.sh install
+```
 
 ## Environment
 Plato was developed and tested on x86_64 cluster and [Centos 7.0](https://www.centos.org/). Theoretically, it can be ported to other Linux distribution easily.
 
-## Build
+## Test && Build
 
 ```bash
-BAZEL_LINKOPTS=-static-libstdc++ CC=/your_mpi_location/mpicxx bazel build example/...
-```
-
-## Test
-
-```bash
-BAZEL_LINKOPTS=-static-libstdc++ CC=/your_mpi_location/mpicxx LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${PWD}/3rd/hadoop2/lib bazel test --test_env=LD_LIBRARY_PATH plato/...
+./build.sh
 ```
 
 ## Run
+
+### Local
+
+```bash
+./scripts/run_pagerank_local.sh
+```
+
+### Production
 
 *Prerequisite:*
 
