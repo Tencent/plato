@@ -69,7 +69,7 @@ function install {
   clean_exec tar vxzf libunwind-1.3.1.tar.gz
 
   pushd libunwind-1.3.1
-  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' ./configure --with-pic CFLAGS=-g --disable-shared --enable-static --disable-documentation --disable-coredump --disable-ptrace --disable-setjmp --prefix=${rootdir}/3rd/libunwind-1.3.1
+  clean_exec ./configure --with-pic CFLAGS=-g --with-pic --disable-shared --enable-static --disable-documentation --disable-coredump --disable-ptrace --disable-setjmp --disable-tests --disable-debug --disable-minidebuginfo --disable-msabi-support --prefix=${rootdir}/3rd/libunwind-1.3.1
   clean_exec make
   clean_exec make install
   popd
