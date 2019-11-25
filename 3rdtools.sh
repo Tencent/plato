@@ -8,7 +8,7 @@ function clean_exec {
   cmd=$*
   eval $cmd
   retcode=$?
-  if [ $retcode != 0 ]; then
+  if [ $retcode -ne 0 ]; then
     echo "'${cmd}' exec failed with code $retcode, abort install process!"
     exit 255
   fi
