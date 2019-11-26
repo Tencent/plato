@@ -198,7 +198,18 @@ size_t mutual(
   auto __send = [&] (bsp_send_callback_t<mutual_msg_t<T>> send) {
     mutual_msg_t<T> partition_msg[cluster_info.partitions_];
 
-    auto traversal = [&](vid_t v_i, const adj_unit_list_spec_t& /* adjs */) {
+    // to avoid gcc compiler bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=86969
+    auto traversal = [
+      &tcsr,
+      &partitions_mask,
+      &partitions_interchange_mask,
+      &mutual_intersect,
+      &partition_msg,
+      &cluster_info,
+      &send,
+      &partitioner,
+      &extract_neis
+    ](vid_t v_i, const adj_unit_list_spec_t& /* adjs */) {
       auto& v_src = tcsr[v_i];
 
       T *msg_begin, *msg_end;

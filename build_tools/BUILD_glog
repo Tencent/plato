@@ -7,7 +7,12 @@ cc_library (
     strip_include_prefix = "include",
     linkopts = [
         "-lpthread",
+        "-Wl,--eh-frame-hdr",
     ],
+    deps = [
+        "//3rd/libunwind:libunwind",
+    ],
+    linkstatic = 1,
     visibility = ["//visibility:public"],
 )
 
