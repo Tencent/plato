@@ -168,13 +168,12 @@ function install {
 
   ## mpich
   if [ ! -f mpich-3.2.1.tar.gz ]; then
-    clean_exec wget -O mpich-3.2.1.tar.gz https://github.com/pmodels/mpich/archive/v3.2.1.tar.gz
+    clean_exec wget -O mpich-3.2.1.tar.gz http://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
   fi
   clean_exec rm -rf mpich-3.2.1
   clean_exec tar vxzf mpich-3.2.1.tar.gz
 
   pushd mpich-3.2.1
-  clean_exec ./autogen.sh
   clean_exec ./configure --with-pic --enable-static --disable-shared --disable-fortran --disable-mpi-fortran --enable-mpi-thread-mutliple --prefix=${rootdir}/3rd/mpich-3.2.1
   clean_exec make -j$(nproc)
   clean_exec make install
@@ -201,7 +200,7 @@ function distclean {
   clean_exec rm mpich mpich-3.2.1 -rf 
   popd
 
-  # rm ${sourceroot} -rf
+  rm ${sourceroot} -rf
 
   echo "distclean 3rd done!"
 }
