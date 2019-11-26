@@ -1,6 +1,6 @@
 # Plato(柏拉图)
 
-[![Build Status](https://travis-ci.com/Tencent/plato.svg?branch=master)](https://travis-ci.com/Tencent/plato)
+[![Build Status](https://travis-ci.org/Tencent/plato.svg?branch=master)](https://travis-ci.org/Tencent/plato)
 
 **A framework for distributed graph computation and machine learning at wechat scale, for more details, see [柏拉图简介](doc/introduction.md) | [Plato Introduction](doc/introduction_en.md).**
 
