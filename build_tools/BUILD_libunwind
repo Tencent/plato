@@ -1,0 +1,12 @@
+cc_library (
+    name = "libunwind",
+    hdrs = glob(["include/*.h"]),
+    srcs = [
+        "lib/libunwind.a"
+    ],
+    strip_include_prefix = "include",
+    linkopts = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
