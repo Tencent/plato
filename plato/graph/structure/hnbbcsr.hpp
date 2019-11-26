@@ -334,7 +334,7 @@ int hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(vid_t vertices, vid_
   {  // count type number
     plato::bitmap_t<> types(std::numeric_limits<uint32_t>::max());
     v_types.reset_traversal();
-#pragma omp parallel
+    #pragma omp parallel
     {
       size_t chunk_size = 1024;
       while (v_types.next_chunk([&](plato::vid_t v_i, uint32_t* ptype) {
@@ -353,7 +353,7 @@ int hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(vid_t vertices, vid_
 
   {  // build type bitmap
     v_types.reset_traversal();
-#pragma omp parallel
+    #pragma omp parallel
     {
       size_t chunk_size = 1024;
       while (v_types.next_chunk([&](vid_t v_i, uint32_t* ptype) {
@@ -374,7 +374,7 @@ int hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(vid_t vertices, vid_
   {
     bitmap_allocator_t __alloc(allocator_);
     auto* __p = __alloc.allocate(1);
-    __alloc.construct(__p, max_vid_ + 1);
+    __alloc.construct(__p, (size_t)max_vid_ + 1UL);
 
     bitmap_.reset(__p, [__alloc](bitmap_pointer p) mutable {
       __alloc.destroy(p);
@@ -459,7 +459,7 @@ int hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(vid_t vertices, vid_
   }
 
   vid_t idx = 0;
-  size_t bm_size = plato::word_offset(max_vid_ + 1);
+  size_t bm_size = plato::word_offset((size_t)max_vid_ + 1UL);
   for (size_t i = 0; i <= bm_size; ++i) {
     if (bitmap_->data_[i]) {
       for (size_t b_i = 0; b_i < 64; ++b_i) {
@@ -626,7 +626,7 @@ typename hnbbcsr_t<EDATA, PART_IMPL, ALLOC>::adj_unit_list_spec_t hnbbcsr_t<EDAT
 
   adj_unit_list_spec_t neis;
   if (bitmap_->get_bit(v_i)) {
-    vid_t pos = max_vid_ + 1;
+    vid_t pos;
     vid_t my_bucket = v_i / bucket_size_;
     vid_t start = buckets_.get()[my_bucket];
     vid_t end = buckets_.get()[my_bucket + 1];

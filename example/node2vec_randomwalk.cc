@@ -252,7 +252,7 @@ void biased_walk(void) {
   plato::graph_info_t graph_info(false);
 
   watch.mark("t1");
-  auto cache = plato::load_edges_cache<float>(&graph_info, FLAGS_input, plato::edge_format_t::CSV,
+  auto cache = plato::load_edges_cache<float, plato::vid_t, plato::edge_cache_t>(&graph_info, FLAGS_input, plato::edge_format_t::CSV,
       plato::float_decoder);
 
   auto& cluster_info = plato::cluster_info_t::get_instance();
@@ -281,7 +281,7 @@ void unbiased_walk(void) {
   plato::graph_info_t graph_info(false);
 
   watch.mark("t1");
-  auto cache = plato::load_edges_cache<plato::empty_t>(&graph_info, FLAGS_input, plato::edge_format_t::CSV,
+  auto cache = plato::load_edges_cache<plato::empty_t, plato::vid_t, plato::edge_cache_t>(&graph_info, FLAGS_input, plato::edge_format_t::CSV,
       plato::dummy_decoder<plato::empty_t>);
 
   auto& cluster_info = plato::cluster_info_t::get_instance();
