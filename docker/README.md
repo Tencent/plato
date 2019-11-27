@@ -9,7 +9,6 @@ Build docker image
 # Or simply build one docker image by
 ./docker-build.sh centos.7
 ./docker-build.sh centos.8
-./docker-build.sh debian.8
 ./docker-build.sh debian.9
 ./docker-build.sh debian.10
 ./docker-build.sh ubuntu.16.04
