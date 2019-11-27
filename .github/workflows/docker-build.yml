@@ -6,13 +6,13 @@ on:
       - master
     paths-ignore:
       - 'doc/**'
-      - '**/README.md'
+      - '**.md'
   pull_request:    
     branches:
       - master
     paths-ignore:
       - 'doc/**'
-      - '**/README.md'
+      - '**.md'
 
 jobs:
   docker-build:
