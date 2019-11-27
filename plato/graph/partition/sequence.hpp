@@ -156,6 +156,8 @@ public:
       }
     }
     CHECK(false) << "can not find which partition " << v_i << " belong";
+    // add abort() to make gcc 6 happy. Otherwise compile failed due to -Werror=return-type.
+    abort();
   }
 
   // get all self vertex's view
@@ -216,6 +218,8 @@ public:
       }
     }
     CHECK(false) << "can not find which partition " << v_i << " belong";
+    // add abort() to make gcc 6 happy. Otherwise compile failed due to -Werror=return-type.
+    abort();
   }
 
   sequence_v_view self_v_view(void) {
