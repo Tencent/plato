@@ -27,7 +27,6 @@ else
     build_docker fedora.31
     build_docker ubuntu.16.04
     build_docker ubuntu.18.04
-    build_docker debian.8
     build_docker debian.9
     build_docker debian.10
 fi
