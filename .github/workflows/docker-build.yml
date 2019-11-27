@@ -1,0 +1,47 @@
+name: docker-build
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'doc/**'
+      - '**/README.md'
+  pull_request:    
+    branches:
+      - master
+    paths-ignore:
+      - 'doc/**'
+      - '**/README.md'
+
+jobs:
+  docker-build:
+    name: docker-build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tag:
+          - centos.7
+          - centos.8
+          - ubuntu.16.04
+          - ubuntu.18.04
+          - debian.9
+          - debian.10
+          - fedora.31
+    container:
+      image: platograph/plato-dev:${{ matrix.tag }}
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: build 3rd libraries.
+      timeout-minutes: 30
+      shell: bash
+      run: |
+        ./3rdtools.sh install
+    - name: test && build
+      timeout-minutes: 40
+      shell: bash
+      run: |
+        ./build.sh
