@@ -4,7 +4,7 @@
 
 **A framework for distributed graph computation and machine learning at wechat scale, for more details, see [柏拉图简介](doc/introduction.md) | [Plato Introduction](doc/introduction_en.md).**
 
-Authors(In alphabetical order):  Benli Li, Conghui He, Donghai Yu, Pin Gao, Shijie Sun, Wenqiang Wu, Wanjing Wei, Xing Huang, Xiaogang Tu, Yongan Li.
+Authors(In alphabetical order):  Benli Li, Conghui He, Donghai Yu, Pin Gao, Shijie Sun, Wenqiang Wu, Wanjing Wei, Xing Huang, Xiaogang Tu, Yangzihao Wang, Yongan Li.
 
 Contact: plato@tencent.com
 
