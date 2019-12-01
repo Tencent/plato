@@ -412,13 +412,17 @@ int bcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_cache(const graph_info_t& graph_i
         if (is_outgoing) {
           send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
         } else {
-          auto tmp = edge->src_; edge->src_ = edge->dst_; edge->dst_ = tmp;
-          send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
+          auto reversed_edge = *edge;
+          reversed_edge.src_ = edge->dst_;
+          reversed_edge.dst_ = edge->src_;
+          send(partitioner_->get_partition_id(edge->dst_, edge->src_), reversed_edge);
         }
       } else {
         send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
-        auto tmp = edge->src_; edge->src_ = edge->dst_; edge->dst_ = tmp;
-        send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
+        auto reversed_edge = *edge;
+        reversed_edge.src_ = edge->dst_;
+        reversed_edge.dst_ = edge->src_;
+        send(partitioner_->get_partition_id(edge->dst_, edge->src_), reversed_edge);
       }
       return true;
     };
