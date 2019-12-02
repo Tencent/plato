@@ -184,7 +184,6 @@ size_t mutual(
       size_t   size_b = msg.msg_size_;
 
       T* out = (T*)out_buffer.local();
-      CHECK(size_a && size_b);
       size_t size_out = intersect(set_a, size_a, set_b, size_b, out);
       CHECK(size_out <= std::min(size_a, size_b))
       << boost::format("size_out: %lu, size_a: %lu, size_b: %lu. ") % size_out % size_a % size_b

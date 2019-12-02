@@ -136,7 +136,7 @@ void load_vertex_data(TCSR& tcsr, std::true_type) {
   watch.mark("t1");
 
   auto pvcache = plato::load_vertices_cache<std::vector<T>>(
-    FLAGS_separator, plato::edge_format_t::CSV, [&](std::vector<T>* item, char* content) {
+    FLAGS_input_vertices, plato::edge_format_t::CSV, [&](std::vector<T>* item, char* content) {
       const char* sep = FLAGS_separator.c_str();
       char* pSave  = nullptr;
       char* pToken = nullptr;
