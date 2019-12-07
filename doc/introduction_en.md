@@ -54,7 +54,6 @@ Open sourced algorithms:
   + [x] Node2Vec-Randomwalk
   + [x] Metapath-Randomwalk
 - [x] Clustering/Unfolding Algorithms
-  + [x] LDA
   + [x] Fast Unfolding
 - [x] Other Graph Algorithms
   + [x] BFS
