@@ -88,7 +88,7 @@ function install {
   
   pushd glog-0.4.0
   clean_exec ./autogen.sh
-  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' LDFLAGS="-L${rootdir}/3rd/libunwind/lib" CPPFLAGS="-I${rootdir}/3rd/libunwind/include" ./configure --enable-shared=no --enable-static=yes --prefix=${rootdir}/3rd/glog-0.4.0
+  clean_exec CXXFLAGS='-fPIC' CFLAGS='-fPIC' LDFLAGS="-L${rootdir}/3rd/libunwind/lib" CPPFLAGS="-I${rootdir}/3rd/libunwind/include" ./configure --enable-shared=no --enable-static=yes --with-gflags=${rootdir}/3rd/gflags-2.2.1 --prefix=${rootdir}/3rd/glog-0.4.0
   clean_exec GFLAGS_LIBS='' make
   clean_exec make install
   popd
