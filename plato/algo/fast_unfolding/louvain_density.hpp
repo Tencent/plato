@@ -345,11 +345,11 @@ public:
 
   /**
    * @brief
-   * @tparam STREAM
-   * @param streams
+   * @tparam Callback
+   * @param callback
    */
-  template <typename STREAM>
-  void save(std::vector<STREAM*>& streams);
+  template <typename Callback>
+  void save(Callback&& callback);
 
 private:
   /**
@@ -571,46 +571,15 @@ void louvain_density_fast_unfolding_t<GRAPH>::update_local_label(std::vector<vid
 }
 
 template<typename GRAPH>
-template<typename STREAM>
-void louvain_density_fast_unfolding_t<GRAPH>::save(std::vector<STREAM*>& ss) {
-  struct louvain_msg_type_t {
-    vid_t src;
-    vid_t label;
-  };
-  boost::lockfree::queue<louvain_msg_type_t> que(1024);
-  LOG_IF(FATAL, !que.is_lock_free())
-  << "boost::lockfree::queue is not lock free\n";
-
-  // start a thread to pop and edge and write to output
-  std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-#pragma omp parallel num_threads(ss.size())
-    {
-      int tid = omp_get_thread_num();
-      louvain_msg_type_t vb;
-      while (!done) {
-        if (que.pop(vb)) {
-          *ss[tid] << vb.src << "," << vb.label << "\n";
-        }
-      }
-
-      while (que.pop(vb)) {
-        *ss[tid] << vb.src << "," << vb.label << "\n";
-      }
-    }
-  });
-
+template<typename Callback>
+void louvain_density_fast_unfolding_t<GRAPH>::save(Callback&& callback) {
   // traverse
   local_label_.template foreach<int> (
     [&] (vid_t v_i, vid_t* pval) {
-      while (!que.push(louvain_msg_type_t {v_i, *pval} )) {
-      }
+      callback(v_i, *pval);
       return 0;
     }
   );
-
-  done = true;
-  pop_write.join();
 }
 
 }  // namespace plato
