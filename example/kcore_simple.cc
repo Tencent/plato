@@ -103,51 +103,19 @@ int main(int argc, char** argv){
     LOG(INFO) << "kmax:        " << FLAGS_kmax;
     LOG(INFO) << "is_directed: " << FLAGS_is_directed;
   }
-
-  std::vector<std::unique_ptr<hdfs_t::fstream>> fs_v(cluster_info.threads_);
-  std::vector<std::unique_ptr<boost::iostreams::filtering_stream<boost::iostreams::output>>> fs_output_v(cluster_info.threads_);
-  std::vector<uint32_t> last_k_v(cluster_info.threads_);
-
-  auto save_kcore_subgraph =
-    [&](vid_t src, vid_t dst, uint32_t cur_k) {
-      int   thread_id = omp_get_thread_num();
-      auto& fs        = fs_v[thread_id];
-      auto& fs_output = fs_output_v[thread_id];
-      auto& last_k    = last_k_v[thread_id];
-
-      if (last_k != cur_k || nullptr == fs) {
-        fs_output.reset(new boost::iostreams::filtering_stream<boost::iostreams::output>());
-        fs.reset(new hdfs_t::fstream(hdfs_t::get_hdfs(FLAGS_output),
-                                     (boost::format("%s/%u_core/%04d_%04d.csv.gz") % FLAGS_output.c_str() % cur_k % cluster_info.partition_id_ % omp_get_thread_num()).str(), true));
-        fs_output->push(boost::iostreams::gzip_compressor());
-        fs_output->push(*fs);
-
-        last_k = cur_k;
-      }
-      *fs_output << src << "," << dst << "\n";
-    };
-
-  auto save_kcore_vertex =
-    [&](vid_t src, vid_t /*dst*/, uint32_t cur_k) {
-      int   thread_id = omp_get_thread_num();
-      auto& fs        = fs_v[thread_id];
-      auto& fs_output = fs_output_v[thread_id];
-
-      if (nullptr == fs) {
-        fs_output.reset(new boost::iostreams::filtering_stream<boost::iostreams::output>());
-        fs.reset(new hdfs_t::fstream(hdfs_t::get_hdfs(FLAGS_output),
-                                     (boost::format("%s/%04d_%04d.csv.gz") % FLAGS_output.c_str() % cluster_info.partition_id_ % thread_id).str(), true));
-        fs_output->push(boost::iostreams::gzip_compressor());
-        fs_output->push(*fs);
-      }
-
-      *fs_output << src << "," << cur_k << "\n";
-    };
-
+  
   plato::graph_info_t graph_info(FLAGS_is_directed);
 
   auto graph = create_bcsr_seqs_from_path<plato::empty_t>(&graph_info, FLAGS_input, plato::edge_format_t::CSV,
       plato::dummy_decoder<plato::empty_t>, FLAGS_alpha, FLAGS_part_by_in, nullptr, false);
+
+  plato::thread_local_fs_output os(FLAGS_output, (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
+  auto save_kcore_vertex =
+    [&](vid_t src, vid_t /*dst*/, uint32_t cur_k) {
+      auto& fs_output = os.local();
+      fs_output << src << "," << cur_k << "\n";
+    };
+
   auto coreness = kcore_algo_t::compute_shell_index(graph_info, *graph, save_kcore_vertex);
 
   watch.mark("t0");
@@ -165,6 +133,14 @@ int main(int argc, char** argv){
     vid_t cur_k = 0;
 
     while (saved < graph_info.vertices_) {
+      plato::thread_local_fs_output os_sub((boost::format("%s/%u_core") % FLAGS_output % cur_k).str(), (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
+
+      auto save_kcore_subgraph =
+        [&](vid_t src, vid_t dst, uint32_t cur_k) {
+          auto& fs_output = os_sub.local();
+          fs_output << src << "," << dst << "\n";
+        };
+
       coreness.template foreach<vid_t>(
         [&](vid_t v_i, vid_t* pcrns) {
           if (*pcrns == cur_k) {

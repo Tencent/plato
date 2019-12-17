@@ -53,14 +53,12 @@ DEFINE_validator(input, &string_not_empty);
 
 
 void save_result(const plato::algo::tree_stat_t& stat,const std::string &value) {
+  auto& cluster_info = plato::cluster_info_t::get_instance();
   
   std::vector<std::string> splits;
   boost::split(splits, value, boost::is_any_of(","));
-
-  plato::hdfs_t::fstream fs(plato::hdfs_t::get_hdfs(), FLAGS_output, true);
-  boost::iostreams::filtering_stream<boost::iostreams::output> fs_output;
-
-  fs_output.push(fs);
+  plato::thread_local_fs_output os(FLAGS_output, (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
+  auto& fs_output = os.local();
 
   for (size_t i = 0; i < splits.size(); ++i) {
     if (0 != i) { fs_output << ","; }
