@@ -43,11 +43,6 @@ public:
   using partition_t = typename dualmode_detail::partition_traits<INCOMING, OUTGOING>::type;
   using closeness_state_t  = dense_state_t<double, partition_t>;
 
-  struct david_msg_type_t {
-    vid_t src_;
-    double value_;
-  };
-
   /**
    * @brief
    * @param engine
@@ -75,11 +70,11 @@ public:
 
   /**
    * @brief
-   * @tparam STREAM
+   * @tparam Callback
    * @param ss
    */
-  template<typename STREAM>
-  void save(std::vector<STREAM*>& ss);
+  template<typename Callback>
+  void save(Callback&& callback);
 
   /**
    * @brief
@@ -263,47 +258,17 @@ double david_closeness_t<INCOMING, OUTGOING>::get_closeness_of(vid_t v) const {
 }
 
 template <typename INCOMING, typename OUTGOING>
-template <typename STREAM>
-void david_closeness_t<INCOMING, OUTGOING>::save(std::vector<STREAM*>& ss) {
-  boost::lockfree::queue<david_msg_type_t> que(1024);
-  LOG_IF(FATAL, !que.is_lock_free())
-    << "boost::lockfree::queue is not lock free\n";
-
-  // start a thread to pop and edge and write to output
-  std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-#pragma omp parallel num_threads(ss.size())
-    {
-      int tid = omp_get_thread_num();
-      david_msg_type_t vb;
-      while (!done) {
-        if (que.pop(vb)) {
-          *ss[tid] << vb.src_ << "," << vb.value_ << "\n";
-        }
-      }
-
-      while (que.pop(vb)) {
-        *ss[tid] << vb.src_ << "," << vb.value_ << "\n";
-      }
-    }
-  });
-
+template <typename Callback>
+void david_closeness_t<INCOMING, OUTGOING>::save(Callback&& callback) {
   auto active_all = engine_->alloc_v_subset();
   active_all.fill();
   //traverse
   auto active_view_all = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), active_all);
-  active_view_all.template foreach<vid_t>([&](vid_t v_i){
-    while (!que.push(david_msg_type_t {v_i, closeness_[v_i] })) {
-    }
+  active_view_all.template foreach<vid_t>([&] (vid_t v_i) {
+    callback(v_i, closeness_[v_i]);
     return 1;
   });
-
-  done = true;
-  pop_write.join();
-
 }
-
-
 
 }  // namespace algo
 }  // namespace plato

@@ -68,12 +68,6 @@ public:
   using partition_t = dcsc_spec_t::partition_t;
   using graph_info_t = plato::graph_info_t;
 
-  struct nstepdegrees_with_vid_t {
-    vid_t v_i;
-    vid_t in_;
-    vid_t out_;
-  }__attribute__((__packed__));
-
   template <uint32_t MsgBitWidth>
   struct nstepdegrees_msg_type_t {
     vid_t vtx;
@@ -128,11 +122,11 @@ public:
 
   /**
    * @brief
-   * @tparam STREAM
-   * @param ss
+   * @tparam Callback
+   * @param callback
    */
-  template<typename STREAM>
-  void save(std::vector<STREAM*>& ss);
+  template<typename Callback>
+  void save(Callback &&callback);
 
   /**
    * @brief
@@ -437,45 +431,17 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::compute(INCOMING& in_edges, O
 }
 
 template<typename INCOMING, typename OUTGOING, uint32_t BitWidth>
-template<typename STREAM>
-void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(std::vector<STREAM*>& ss) {
+template<typename Callback>
+void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(Callback &&callback) {
   if(engine_->is_reversed()) {
     engine_->reverse();
   }
-  auto& cluster_info = plato::cluster_info_t::get_instance();
-  vid_t v_begin = engine_->out_edges()->partitioner()->offset_[cluster_info.partition_id_];
-  vid_t v_end = engine_->out_edges()->partitioner()->offset_[cluster_info.partition_id_+1];
-  size_t vtx_count = v_end - v_begin;
-
-  boost::lockfree::queue<nstepdegrees_with_vid_t> que(vtx_count + 1);
-  LOG_IF(FATAL, !que.is_lock_free())
-  << "boost::lockfree::queue is not lock free\n";
-  std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-#pragma omp parallel num_threads(ss.size())
-    {
-      int tid = omp_get_thread_num();
-      nstepdegrees_with_vid_t degree;
-      while(!done) {
-        if(que.pop(degree)) {
-          *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
-        }
-      }
-
-      while(que.pop(degree)) {
-        *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
-      }
-    }
-  });
 
   auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), target_);
-  active_view.template foreach<vid_t>([&](vid_t v_i){
-    while(!que.push(nstepdegrees_with_vid_t {v_i, degrees_[v_i].in_, degrees_[v_i].out_})) {}
+  active_view.template foreach<vid_t>([&] (vid_t v_i) {
+    callback(v_i, degrees_[v_i].in_, degrees_[v_i].out_);
     return 1;
   });
-
-  done = true;
-  pop_write.join();
 }
 
 }}
