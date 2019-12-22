@@ -286,7 +286,7 @@ std::vector<T> generate_dense_in_degrees(const graph_info_t& graph_info, EDGE_CA
   return degrees;
 }
 
-// generate dense out degrees from graph, only keep degrees in this partition
+// generate dense degrees from graph, only keep degrees in this partition
 // std::vector is not a good option
 template <typename T, typename GRAPH>
 dense_state_t<T, typename GRAPH::partition_t> generate_dense_degrees_fg (
