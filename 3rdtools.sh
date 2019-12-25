@@ -48,8 +48,8 @@ function install {
   clean_exec tar vxzf gflags-2.2.1.tar.gz
 
   pushd gflags-2.2.1
-  mkdir -p build
-  pushd build
+  mkdir -p tmp_build
+  pushd tmp_build
   clean_exec CXXFLAGS="-fPIC" cmake .. -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=${rootdir}/3rd/gflags-2.2.1
   clean_exec make
   clean_exec make install
