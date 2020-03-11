@@ -42,6 +42,8 @@
 #include "plato/util/spinlock.hpp"
 
 namespace plato { namespace algo {
+using dcsc_spec_t = plato::dcsc_t<plato::empty_t, plato::sequence_balanced_by_source_t>;
+using partition_t = dcsc_spec_t::partition_t;
 
 struct nstepdegree_opts_t {
   uint32_t step = 20;   // steps
@@ -64,9 +66,13 @@ class nstepdegrees_t {
 public:
   using vid_t = plato::vid_t;
   using hll = plato::hyperloglog_t<BitWidth>;
-  using dcsc_spec_t = plato::dcsc_t<plato::empty_t, plato::sequence_balanced_by_source_t>;
-  using partition_t = dcsc_spec_t::partition_t;
   using graph_info_t = plato::graph_info_t;
+
+  struct nstepdegrees_with_vid_t {
+    vid_t v_i;
+    vid_t in_;
+    vid_t out_;
+  }__attribute__((__packed__));
 
   template <uint32_t MsgBitWidth>
   struct nstepdegrees_msg_type_t {
@@ -76,6 +82,7 @@ public:
 
   using v_subset_t = bitmap_t<>;
   using hll_state_t = plato::dense_state_t<hll, partition_t>;
+  
 
 public:
   /**
@@ -122,11 +129,11 @@ public:
 
   /**
    * @brief
-   * @tparam Callback
-   * @param callback
+   * @tparam STREAM
+   * @param ss
    */
-  template<typename Callback>
-  void save(Callback &&callback);
+  template<typename STREAM>
+  void save(std::vector<STREAM*>& ss);
 
   /**
    * @brief
@@ -142,8 +149,10 @@ public:
    * @brief getter
    * @return
    */
-  std::unordered_map<vid_t, degrees_record_t> get_degrees();
 
+  //only for test
+  plato::vid_t get_degree(plato::vid_t pos, bool in);
+  
 private:
   plato::graph_info_t graph_info_;
   dualmode_engine_t<INCOMING, OUTGOING>* engine_;
@@ -151,8 +160,7 @@ private:
   v_subset_t active_in_;
   v_subset_t target_;
   nstepdegree_opts_t opts_;
-  std::unordered_map<vid_t, degrees_record_t> degrees_;
-
+  plato::dense_state_t<degrees_record_t, partition_t> degrees_ = engine_->template alloc_v_state<degrees_record_t>(); 
 };
 
 template<typename INCOMING, typename OUTGOING, uint32_t BitWidth>
@@ -267,7 +275,6 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::view_coverage() {
   std::vector<vid_t> res;
 
   auto& cluster_info = plato::cluster_info_t::get_instance();
-  //auto in_edge_ = engine->in_edges();
   auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), covered_);
   active_view.template foreach<plato::vid_t>(
     [&](plato::vid_t v_i) {
@@ -278,7 +285,6 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::view_coverage() {
   mylock.lock_ = 0;
   mylock.lock();
   LOG(INFO) << "covered-------------------------->"  << std::endl;
-  //LOG(INFO) << "partition_id:" << cluster_info.partition_id_ << ":";
   for(int i = 0; i < res.size(); ++i) {
     LOG(INFO) << res[i] << ",";
   }
@@ -298,9 +304,14 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::view_degrees() {
   LOG(INFO) << std::endl;
 }
 
+//only for unit test.
 template <typename INCOMING, typename OUTGOING, uint32_t BitWidth>
-std::unordered_map<vid_t, degrees_record_t> nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::get_degrees() {
-  return degrees_;
+plato::vid_t nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::get_degree(plato::vid_t pos, bool in) {
+  if(in) {
+    return degrees_[pos].in_;
+  } else {
+    return degrees_[pos].out_;
+  }
 }
 
 template<typename INCOMING, typename OUTGOING, uint32_t BitWidth>
@@ -385,7 +396,6 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::propagate(INCOMING& in_edges,
       },
       &covered_);
   }
-
   books.template foreach<int> (
     [&](vid_t vtx, hll* hll_data) {
       switch(type) {
@@ -423,25 +433,55 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::compute(INCOMING& in_edges, O
       propagate(in_edges, out_edges, count_type_t::OUT_DEGREE, true);
     }
     else {
-      for(auto kv : degrees_) {
-        kv.second.out_ = kv.second.in_;
-      }
+      degrees_.template foreach<int> (
+        [&] (vid_t vtx, degrees_record_t* record) {
+          record->out_ = record->in_;
+          return 0;
+        });
     }
   }
 }
 
 template<typename INCOMING, typename OUTGOING, uint32_t BitWidth>
-template<typename Callback>
-void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(Callback &&callback) {
+template<typename STREAM>
+void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(std::vector<STREAM*>& ss) {
   if(engine_->is_reversed()) {
     engine_->reverse();
   }
+  auto& cluster_info = plato::cluster_info_t::get_instance();
+  vid_t v_begin = engine_->out_edges()->partitioner()->offset_[cluster_info.partition_id_];
+  vid_t v_end = engine_->out_edges()->partitioner()->offset_[cluster_info.partition_id_+1];
+  size_t vtx_count = v_end - v_begin;
+
+  boost::lockfree::queue<nstepdegrees_with_vid_t> que(vtx_count + 1);
+  LOG_IF(FATAL, !que.is_lock_free())
+  << "boost::lockfree::queue is not lock free\n";
+  std::atomic<bool> done(false);
+  std::thread pop_write([&done, &ss, &que](void) {
+#pragma omp parallel num_threads(ss.size())
+    {
+      int tid = omp_get_thread_num();
+      nstepdegrees_with_vid_t degree;
+      while(!done) {
+        if(que.pop(degree)) {
+          *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
+        }
+      }
+
+      while(que.pop(degree)) {
+        *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
+      }
+    }
+  });
 
   auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), target_);
-  active_view.template foreach<vid_t>([&] (vid_t v_i) {
-    callback(v_i, degrees_[v_i].in_, degrees_[v_i].out_);
+  active_view.template foreach<vid_t>([&](vid_t v_i){
+    while(!que.push(nstepdegrees_with_vid_t {v_i, degrees_[v_i].in_, degrees_[v_i].out_})) {}
     return 1;
   });
+
+  done = true;
+  pop_write.join();
 }
 
 }}

@@ -80,6 +80,7 @@ TEST(nstepdegrees, load_vertices) {
         res.push_back(unit.vid_);
     }
   );
+
   for(uint32_t i = 0; i < res.size(); ++i) {
       ASSERT_GE(6, res[i]);
   }
@@ -91,14 +92,11 @@ void test_work_flow(plato::dualmode_engine_t<dcsc_spec_t, bcsr_spec_t>* engine, 
   plato::algo::nstepdegrees_t<dcsc_spec_t, bcsr_spec_t, BitWidth> nstepdegrees(engine, graph_info, actives_v, opts);
   nstepdegrees.compute(graph.second, graph.first);
   nstepdegrees.view_degrees();
-
-  auto degrees = nstepdegrees.get_degrees();
-
-  //notice: just 1 partition allowed.
-  ASSERT_EQ(degrees[0].in_, 3); 
-  ASSERT_EQ(degrees[0].out_, 1);
-  ASSERT_EQ(degrees[4].in_, 1);
-  ASSERT_EQ(degrees[4].out_, 1);
+  
+  ASSERT_EQ(nstepdegrees.get_degree(0, true), 3); 
+  ASSERT_EQ(nstepdegrees.get_degree(0, false), 1); 
+  ASSERT_EQ(nstepdegrees.get_degree(4, true), 1); 
+  ASSERT_EQ(nstepdegrees.get_degree(4, false), 1); 
 }
 
 TEST(nstepdegrees, computer) {
