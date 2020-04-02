@@ -242,7 +242,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
         betweenness_[v_i] += d;
         if (v_i == chosen_) {
           sum_dependence_ += d;
-          LOG(INFO) << "chosen add: " << d << std::endl;
         }
       }
       return 1;
@@ -256,7 +255,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
   auto update_betweenness = [&](vid_t sample_size) {
     active_view_all.template foreach<vid_t>([&](vid_t v_i) {
       betweenness_[v_i] = major_component_vertices_ * betweenness_[v_i] / sample_size;
-      LOG(INFO) << "vid: " << v_i << " d: " << betweenness_[v_i] << " major: " << major_component_vertices_ << std::endl;
       if (std::isnan(betweenness_[v_i])) {
         betweenness_[v_i] = 0;
       }
@@ -387,7 +385,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
             sum += (dependencies_[src] + 1.0) / num_paths_[src];
           }
         }
-        LOG(INFO) << "send sum: " << sum << std::endl;
         if (sum > 0) {
           context.send(pull_message_t{ v_i, bader_msg_type_t{ v_i, sum } });
         }
@@ -395,8 +392,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
       [&](int, pull_message_t& msg) {
         if (!visited.get_bit(msg.v_i_)) {
           write_add(&(dependencies_[msg.v_i_]), msg.message_.value_ * num_paths_[msg.v_i_]);
-          LOG(INFO) << "vid: " << msg.v_i_ << " recv sum: " << msg.message_.value_ << " num_paths: " << num_paths_[msg.v_i_] << " cur: "
-                    << dependencies_[msg.v_i_] << std::endl;
         }
         return 0;
       },
