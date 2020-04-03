@@ -66,6 +66,7 @@ public:
 
   using partition_t = typename dualmode_detail::partition_traits<INCOMING, OUTGOING>::type;
   using cgm_state_t = dense_state_t<vid_t, partition_t>;
+  using edata_t = typename INCOMING::edata_t;
 
 public:
   explicit connected_component_t(dualmode_engine_t<INCOMING, OUTGOING> * engine, const graph_info_t& graph_info);
@@ -78,28 +79,55 @@ public:
 
   /**
    * @brief
+   * @tparam VID_T
+   * @param vid_encoder
    * @return
    */
-  std::string get_summary() const;
-
-  //write the component that is labeled with \label
-  template <typename STREAM_T>
-  void write_component(STREAM_T &str, vid_t label);
+  template <typename VID_T>
+  std::string get_summary(vencoder_t<edata_t, VID_T> vid_encoder = nullptr) const;
 
   /**
    * @brief
-   * @tparam STREAM_T
-   * @param ss
+   * @tparam VID_T
+   * @param prefix
    * @param label
+   * @param vid_encoder
    */
-  template <typename STREAM_T>
-  void write_component(std::vector<STREAM_T *> &ss, vid_t label);
+  template <typename VID_T>
+  void write_component(const std::string& prefix, VID_T label, vencoder_t<edata_t, VID_T> vid_encoder = nullptr);
+
+  /**
+   * @brief
+   * @tparam VID_T
+   * @param prefix
+   * @param vid_encoder
+   */
+  template <typename VID_T>
+  void write_all_vertices(const std::string& prefix, vencoder_t<edata_t, VID_T> vid_encoder = nullptr);
+
+
+  /**
+   * @brief
+   * @tparam VID_T
+   * @param prefix
+   * @param vid_encoder
+   */
+  template <typename VID_T>
+  void write_all_edges(const std::string& prefix, vencoder_t<edata_t, VID_T> vid_encoder = nullptr);
 
   /**
    * @brief
    * @return
    */
   int get_num_components() const { return global_label_info_.size(); }
+
+  /**
+   * @brief
+   * @return
+   */
+  std::unordered_map<vid_t, comp_info_t>* get_components_info() {
+    return &global_label_info_; 
+  }
 
   /**
    * @brief major_label_ getter
@@ -123,10 +151,10 @@ public:
   cgm_state_t* get_labels() { return &labels_; }
 
 private:
-  graph_info_t graph_info_;
   std::unordered_map<vid_t, comp_info_t> global_label_info_;
   vid_t major_label_;
   dualmode_engine_t<INCOMING, OUTGOING> * engine_;
+  graph_info_t graph_info_;
   cgm_state_t labels_;
 };
 
@@ -260,7 +288,7 @@ void connected_component_t<INCOMING, OUTGOING>::compute() {
       MPI_Gatherv(
         &vec[0], vec.size(), get_mpi_data_type<vid_t>(), &all[0], &counts[0],
         &displ[0], get_mpi_data_type<vid_t>(), 0, MPI_COMM_WORLD);
-      MPI_Bcast(&all[0], all.size(), get_mpi_data_type<vid_t>(), 0, MPI_COMM_WORLD);
+      bcast(&all[0], all.size(), get_mpi_data_type<vid_t>(), 0, MPI_COMM_WORLD);
       return all;
     };
 
@@ -275,7 +303,9 @@ void connected_component_t<INCOMING, OUTGOING>::compute() {
   }
 
   std::vector<eid_t> comp_edges(graph_info_.vertices_, 0);
-  LOG(INFO) << "there are " << global_label_info_.size() << " components";
+  if (cluster_info.partition_id_ == 0) {
+    LOG(INFO) << "there are " << global_label_info_.size() << " components";
+  }
 
   auto traversal = [&](vid_t v_i, const adj_unit_list_spec_t& adjs) {
     for (auto it = adjs.begin_; adjs.end_ != it; ++it) {
@@ -294,7 +324,7 @@ void connected_component_t<INCOMING, OUTGOING>::compute() {
   }
 
   LOG(INFO) << "calc edges in each components";
-  MPI_Allreduce(MPI_IN_PLACE, &comp_edges[0], comp_edges.size(), get_mpi_data_type<eid_t>(), MPI_SUM,
+  allreduce(MPI_IN_PLACE, &comp_edges[0], comp_edges.size(), get_mpi_data_type<eid_t>(), MPI_SUM,
       MPI_COMM_WORLD);
   vid_t major_label_cnt = 0;
   for (auto &e : global_label_info_) {
@@ -311,7 +341,9 @@ void connected_component_t<INCOMING, OUTGOING>::compute() {
 }
 
 template <typename INCOMING, typename OUTGOING>
-std::string connected_component_t<INCOMING, OUTGOING>::get_summary() const {
+template <typename VID_T>
+std::string connected_component_t<INCOMING, OUTGOING>::get_summary(
+    vencoder_t<edata_t, VID_T> vid_encoder) const {
   std::stringstream ss;
 
   ss << "Connected component summary: \n";
@@ -340,8 +372,12 @@ std::string connected_component_t<INCOMING, OUTGOING>::get_summary() const {
 
   int count = 0;
   for (const auto &c : comps) {
-    ss << boost::format("Component #%d, label=%u, vertices=%u, edges=%lu\n") %
-          ++count % c->label % c->vertices % c->edges;
+    ss << "Component #"  << ++count;
+    if (vid_encoder == nullptr) ss << ", label=" << c->label;
+    else ss << ", label=" << vid_encoder->data()[c->label];
+
+    ss << boost::format(", vertices=%u, edges=%lu\n") %
+        c->vertices % c->edges;
   }
 
   std::for_each(comps.begin(), comps.end(), std::default_delete<triple>());
@@ -350,57 +386,70 @@ std::string connected_component_t<INCOMING, OUTGOING>::get_summary() const {
 }
 
 template <typename INCOMING, typename OUTGOING>
-template <typename STREAM_T>
+template <typename VID_T>
 void connected_component_t<INCOMING, OUTGOING>::write_component(
-  std::vector<STREAM_T *> &ss, vid_t target_label) {
+  const std::string& prefix, VID_T target_label, vencoder_t<edata_t, VID_T> vid_encoder) {
 
   auto& cluster_info = plato::cluster_info_t::get_instance();
-
-  if (target_label == (vid_t)(-1)) {
-    target_label = major_label_;
-  }
-  struct edge_t {
-    vid_t src, dst;
-  };
-  boost::lockfree::queue<edge_t> que(1024);
-
-  LOG_IF(FATAL, !que.is_lock_free())
-  << "boost::lockfree::queue is not lock free\n";
-
-  // start a thread to pop and edge and write to output
-  std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-    #pragma omp parallel num_threads(ss.size())
-    {
-      int tid = omp_get_thread_num();
-      edge_t e;
-      while (!done) {
-        if (que.pop(e)) {
-          *ss[tid] << e.src << "," << e.dst << "\n";
-        }
-      }
-
-      while (que.pop(e)) {
-        *ss[tid] << e.src << "," << e.dst << "\n";
+  vid_t actual_label = graph_info_.vertices_;
+  if (vid_encoder != nullptr && target_label != (VID_T)-1) {
+    //need trans to encoded id
+    vid_t tmp = graph_info_.vertices_;
+    #pragma omp parallel num_threads(cluster_info.threads_)
+    for (vid_t i = 0; i < graph_info_.vertices_; ++i) {
+      if (vid_encoder->data()[i] == target_label) {
+        tmp = i; 
       }
     }
-  });
+    actual_label = tmp;
+  } else {
+    if (target_label == (VID_T)-1) {
+      actual_label = major_label_;
+    } else {
+      actual_label = (vid_t)target_label;
+    }
+  }
+
+  if (actual_label >= graph_info_.vertices_) {
+    return;
+  }
+
+  thread_local_fs_output os(prefix, (boost::format("part_%04d_") % cluster_info.partition_id_).str(), true);
+
+  if (actual_label != (vid_t)-1 && 
+      global_label_info_.find(actual_label) == global_label_info_.end()) {
+    //not a component id, regard as vertex id and try to find its component id  
+    vid_t tmp = graph_info_.vertices_;
+    if (engine_->in_edges()->partitioner()->get_partition_id(actual_label)
+        == cluster_info.partition_id_) {
+      tmp = labels_[actual_label];
+    }
+    MPI_Allreduce(MPI_IN_PLACE, &tmp, 1, get_mpi_data_type<vid_t>(), MPI_MIN, MPI_COMM_WORLD);
+    actual_label = tmp;
+  }
+
+  auto output_result = [&](vid_t src, vid_t dst) {
+    auto& fs_output = os.local();
+    if (vid_encoder != nullptr) {
+      fs_output << vid_encoder->decode(src) << "," << vid_encoder->decode(dst) << "\n";
+    } else {
+      fs_output << src << "," << dst << "\n";
+    }
+  };
 
   using adj_unit_list_spec_t = typename INCOMING::adj_unit_list_spec_t;
   auto traversal = [&](vid_t v_i, const adj_unit_list_spec_t& adjs) {
     for (auto it = adjs.begin_; adjs.end_ != it; ++it) {
       vid_t src = it->neighbour_;
       vid_t src_label = labels_[src];
-      if (src_label == target_label) {
+      if (src_label == actual_label) {
         if (!graph_info_.is_directed_) {
           if (src < v_i) {
-            while (!que.push({src, v_i})) {
-            }
+            output_result(src, v_i);
           } 
         }
         else {
-          while (!que.push({src, v_i})) {
-          }
+          output_result(src, v_i);
         }
       }
     }
@@ -414,17 +463,78 @@ void connected_component_t<INCOMING, OUTGOING>::write_component(
     while (engine_->in_edges()->next_chunk(traversal, &chunk_size)) { }
   }
 
-  done = true;
-  pop_write.join();
 }
 
 template <typename INCOMING, typename OUTGOING>
-template <typename STREAM_T>
-void connected_component_t<INCOMING, OUTGOING>::write_component(
-  STREAM_T &str, vid_t target_label) {
-  std::vector<STREAM_T *> v;
-  v.emplace_back(&str);
-  write_component(v, target_label);
+template <typename VID_T>
+void connected_component_t<INCOMING, OUTGOING>::write_all_vertices(const std::string& prefix, 
+    vencoder_t<edata_t, VID_T> vid_encoder) {
+
+  auto actives = engine_->alloc_v_subset();
+  actives.fill();
+  auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), actives);
+
+  auto& cluster_info = plato::cluster_info_t::get_instance();
+  thread_local_fs_output os(prefix, (boost::format("part_%04d_") % cluster_info.partition_id_).str(), true);
+
+  auto output_result = [&](vid_t v) {
+    auto& fs_output = os.local();
+    if (vid_encoder != nullptr) {
+      fs_output << vid_encoder->decode(v) << "," << vid_encoder->decode(labels_[v]) << "\n";
+    } else {
+      fs_output << v << "," << labels_[v] << "\n";
+    }
+  };
+
+  active_view.template foreach<vid_t>([&](vid_t v_i) {
+    output_result(v_i);
+    return 0;
+  });
+
+}
+
+template <typename INCOMING, typename OUTGOING>
+template <typename VID_T>
+void connected_component_t<INCOMING, OUTGOING>::write_all_edges(const std::string& prefix, 
+    vencoder_t<edata_t, VID_T> vid_encoder) {
+
+  auto& cluster_info = plato::cluster_info_t::get_instance();
+  thread_local_fs_output os(prefix, (boost::format("part_%04d_") % cluster_info.partition_id_).str(), true);
+
+  auto output_result = [&](vid_t label, vid_t src, vid_t dst) {
+    auto& fs_output = os.local();
+    if (vid_encoder != nullptr) {
+      fs_output << vid_encoder->decode(label) << "," << 
+          vid_encoder->decode(src) << "," << vid_encoder->decode(dst) << "\n";
+    } else {
+      fs_output << label << "," << src << "," << dst << "\n";
+    }
+  };
+
+  using adj_unit_list_spec_t = typename INCOMING::adj_unit_list_spec_t;
+  auto traversal = [&](vid_t v_i, const adj_unit_list_spec_t& adjs) {
+    for (auto it = adjs.begin_; adjs.end_ != it; ++it) {
+      vid_t src = it->neighbour_;
+      vid_t src_label = labels_[src];
+      if (!graph_info_.is_directed_) {
+        if (src < v_i) {
+          output_result(src_label, src, v_i);
+        } 
+      }
+      else {
+        output_result(src_label, src, v_i);
+      }
+      
+    }
+    return true;
+  };
+
+  engine_->in_edges()->reset_traversal();
+  #pragma omp parallel num_threads(cluster_info.threads_)
+  {
+    size_t chunk_size = 256;
+    while (engine_->in_edges()->next_chunk(traversal, &chunk_size)) { }
+  }
 }
 
 

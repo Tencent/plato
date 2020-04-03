@@ -239,12 +239,12 @@ size_t bitmap_t<ALLOC>::count(void) const {
 
 template <typename ALLOC>
 void bitmap_t<ALLOC>::sync(void) {
-  MPI_Allreduce(MPI_IN_PLACE, data_, word_offset(size_) + 1, get_mpi_data_type<uint64_t>(), MPI_BOR, MPI_COMM_WORLD);
+  allreduce(MPI_IN_PLACE, data_, word_offset(size_) + 1, get_mpi_data_type<uint64_t>(), MPI_BOR, MPI_COMM_WORLD);
 }
 
 template <typename ALLOC>
 void bitmap_t<ALLOC>::allreduce_band() {
-  MPI_Allreduce(MPI_IN_PLACE, data_, word_offset(size_) + 1, get_mpi_data_type<uint64_t>(), MPI_BAND, MPI_COMM_WORLD);
+  allreduce(MPI_IN_PLACE, data_, word_offset(size_) + 1, get_mpi_data_type<uint64_t>(), MPI_BAND, MPI_COMM_WORLD);
 }
 template <typename ALLOC>
 std::vector<size_t> bitmap_t<ALLOC>::to_vector(void) {
