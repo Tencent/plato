@@ -60,7 +60,7 @@ void __init_offset(std::vector<vid_t>* poffset, const DT* degrees, vid_t vertice
     for (vid_t v_i = poffset->at(p_i); v_i < vertices; ++v_i) {
       amount += (alpha + degrees[v_i]);
       if (amount >= expected_amount) {
-        poffset->at(p_i + 1) = v_i;
+        poffset->at(p_i + 1) = v_i / PAGESIZE * PAGESIZE;
         break;
       }
     }
