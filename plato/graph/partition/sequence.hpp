@@ -150,13 +150,14 @@ public:
 
   // get vertex's partition
   inline int get_partition_id(vid_t v_i) {
-    if(v_i >= offset_.back()){
-      CHECK(false) << "can not find which partition " << v_i << " belong";
-      abort();
+    for (size_t p_i = 0; p_i < (offset_.size() - 1); ++p_i) {
+      if (v_i >= offset_[p_i] && v_i < offset_[p_i + 1]) {
+        return p_i;
+      }
     }
-    auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    int partition_id =  std::distance(offset_.begin(), t);
-    return partition_id > 0 ? partition_id - 1 : partition_id;
+    CHECK(false) << "can not find which partition " << v_i << " belong";
+    // add abort() to make gcc 6 happy. Otherwise compile failed due to -Werror=return-type.
+    abort();
   }
 
   // get all self vertex's view
@@ -211,13 +212,14 @@ public:
 
   // get vertex's partition
   inline int get_partition_id(vid_t v_i) {
-    if(v_i >= offset_.back()){
-      CHECK(false) << "can not find which partition " << v_i << " belong";
-      abort();
+    for (size_t p_i = 0; p_i < (offset_.size() - 1); ++p_i) {
+      if (v_i >= offset_[p_i] && v_i < offset_[p_i + 1]) {
+        return p_i;
+      }
     }
-    auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    int partition_id =  std::distance(offset_.begin(), t);
-    return partition_id > 0 ? partition_id - 1 : partition_id;
+    CHECK(false) << "can not find which partition " << v_i << " belong";
+    // add abort() to make gcc 6 happy. Otherwise compile failed due to -Werror=return-type.
+    abort();
   }
 
   sequence_v_view self_v_view(void) {
