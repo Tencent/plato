@@ -60,7 +60,7 @@ void __init_offset(std::vector<vid_t>* poffset, const DT* degrees, vid_t vertice
     for (vid_t v_i = poffset->at(p_i); v_i < vertices; ++v_i) {
       amount += (alpha + degrees[v_i]);
       if (amount >= expected_amount) {
-        poffset->at(p_i + 1) = v_i / PAGESIZE * PAGESIZE;
+        poffset->at(p_i + 1) = v_i;
         break;
       }
     }
@@ -155,7 +155,8 @@ public:
       abort();
     }
     auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    return *(--t);
+    int partition_id =  std::distance(offset_.begin(), t);
+    return partition_id > 0 ? partition_id - 1 : partition_id;
   }
 
   // get all self vertex's view
@@ -215,7 +216,8 @@ public:
       abort();
     }
     auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    return *(--t);
+    int partition_id =  std::distance(offset_.begin(), t);
+    return partition_id > 0 ? partition_id - 1 : partition_id;
   }
 
   sequence_v_view self_v_view(void) {
