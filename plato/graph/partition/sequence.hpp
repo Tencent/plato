@@ -155,7 +155,8 @@ public:
       abort();
     }
     auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    return *(--t);
+    int partition_id =  std::distance(offset_.begin(), t);
+    return partition_id > 0 ? partition_id - 1 : partition_id;
   }
 
   // get all self vertex's view
@@ -215,7 +216,8 @@ public:
       abort();
     }
     auto t = std::upper_bound(offset_.begin(), offset_.end(), v_i);
-    return *(--t);
+    int partition_id =  std::distance(offset_.begin(), t);
+    return partition_id > 0 ? partition_id - 1 : partition_id;
   }
 
   sequence_v_view self_v_view(void) {
