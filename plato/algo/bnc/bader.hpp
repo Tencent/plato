@@ -88,11 +88,11 @@ public:
   void compute();
   /**
    * @brief
-   * @tparam STREAM
+   * @tparam Callback
    * @param streams
    */
-  template <typename STREAM>
-  void save(std::vector<STREAM*>& streams);
+  template <typename Callback>
+  void save(Callback&& callback);
 
   /**
    * @brief
@@ -242,7 +242,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
         betweenness_[v_i] += d;
         if (v_i == chosen_) {
           sum_dependence_ += d;
-          LOG(INFO) << "chosen add: " << d << std::endl;
         }
       }
       return 1;
@@ -256,7 +255,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
   auto update_betweenness = [&](vid_t sample_size) {
     active_view_all.template foreach<vid_t>([&](vid_t v_i) {
       betweenness_[v_i] = major_component_vertices_ * betweenness_[v_i] / sample_size;
-      LOG(INFO) << "vid: " << v_i << " d: " << betweenness_[v_i] << " major: " << major_component_vertices_ << std::endl;
       if (std::isnan(betweenness_[v_i])) {
         betweenness_[v_i] = 0;
       }
@@ -387,7 +385,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
             sum += (dependencies_[src] + 1.0) / num_paths_[src];
           }
         }
-        LOG(INFO) << "send sum: " << sum << std::endl;
         if (sum > 0) {
           context.send(pull_message_t{ v_i, bader_msg_type_t{ v_i, sum } });
         }
@@ -395,8 +392,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
       [&](int, pull_message_t& msg) {
         if (!visited.get_bit(msg.v_i_)) {
           write_add(&(dependencies_[msg.v_i_]), msg.message_.value_ * num_paths_[msg.v_i_]);
-          LOG(INFO) << "vid: " << msg.v_i_ << " recv sum: " << msg.message_.value_ << " num_paths: " << num_paths_[msg.v_i_] << " cur: "
-                    << dependencies_[msg.v_i_] << std::endl;
         }
         return 0;
       },
@@ -410,41 +405,14 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
 }
 
 template <typename INCOMING, typename OUTGOING, typename T>
-template <typename STREAM>
-void bader_betweenness_t<INCOMING, OUTGOING, T>::save(std::vector<STREAM*>& ss) {
-  boost::lockfree::queue<bader_msg_type_t> que(1024);
-  LOG_IF(FATAL, !que.is_lock_free()) << "boost::lockfree::queue is not lock free\n";
-
-  // start a thread to pop and edge and write to output
-  std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-#pragma omp parallel num_threads(ss.size())
-    {
-      int tid = omp_get_thread_num();
-      bader_msg_type_t vb;
-      while (!done) {
-        if (que.pop(vb)) {
-          *ss[tid] << vb.src_ << "," << vb.value_ << "\n";
-        }
-      }
-
-      while (que.pop(vb)) {
-        *ss[tid] << vb.src_ << "," << vb.value_ << "\n";
-      }
-    }
-  });
-
+template <typename Callback>
+void bader_betweenness_t<INCOMING, OUTGOING, T>::save(Callback&& callback) {
   // traverse
   auto active_view_all = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), active_all_);
-  active_view_all.template foreach<vid_t>([&](vid_t v_i){
-    while (!que.push(bader_msg_type_t {v_i, betweenness_[v_i] })) {
-    }
+  active_view_all.template foreach<vid_t>([&] (vid_t v_i) {
+    callback(v_i, betweenness_[v_i]);
     return 1;
   });
-
-  done = true;
-  pop_write.join();
-
 }
 
 }

@@ -136,13 +136,13 @@ void load_vertex_data(TCSR& tcsr, std::true_type) {
   watch.mark("t1");
 
   auto pvcache = plato::load_vertices_cache<std::vector<T>>(
-    FLAGS_separator, plato::edge_format_t::CSV, [&](std::vector<T>* item, char* content) {
+    FLAGS_input_vertices, plato::edge_format_t::CSV, [&](std::vector<T>* item, char* content) {
       const char* sep = FLAGS_separator.c_str();
       char* pSave  = nullptr;
       char* pToken = nullptr;
       pToken = strtok_r(content, sep, &pSave);
       while (pToken) {
-        T val = std::strtoul(content, nullptr, 0);
+        T val = std::strtoul(pToken, nullptr, 0);
         item->emplace_back(val);
         pToken = strtok_r(nullptr, sep, &pSave);
       }
@@ -208,10 +208,12 @@ void process_mutual(void) {
         auto& local_os = os.local();
         local_os << src << "," << dst << ",";
         if (FLAGS_ouput_list) {
-          for (size_t i = 0; i < size_out - 1; i++) {
-            local_os << mutual[i] << ":";
+          if (size_out) {
+            for (size_t i = 0; i < size_out - 1; i++) {
+              local_os << mutual[i] << ":";
+            }
+            local_os << mutual[size_out - 1];
           }
-          local_os << mutual[size_out - 1];
         } else {
           local_os << size_out;
         }

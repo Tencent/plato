@@ -224,7 +224,7 @@ std::shared_ptr<CACHE<EDATA, vid_t>> load_edges_cache(
   }
 
   MPI_Allreduce(MPI_IN_PLACE, &edges, 1, get_mpi_data_type<eid_t>(), MPI_SUM, MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, v_bitmap.data_, word_offset(v_bitmap.size_) + 1, get_mpi_data_type<uint64_t>(),
+  allreduce(MPI_IN_PLACE, v_bitmap.data_, word_offset(v_bitmap.size_) + 1, get_mpi_data_type<uint64_t>(),
       MPI_BOR, MPI_COMM_WORLD);
 
   if (pginfo) {
@@ -256,7 +256,7 @@ std::vector<T> generate_dense_out_degrees(const graph_info_t& graph_info, EDGE_C
     size_t chunk_size = 64;
     while (cache.next_chunk(traversal, &chunk_size)) { }
   }
-  MPI_Allreduce(MPI_IN_PLACE, degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
+  allreduce(MPI_IN_PLACE, degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
 
   return degrees;
 }
@@ -281,12 +281,12 @@ std::vector<T> generate_dense_in_degrees(const graph_info_t& graph_info, EDGE_CA
     size_t chunk_size = 64;
     while (cache.next_chunk(traversal, &chunk_size)) { }
   }
-  MPI_Allreduce(MPI_IN_PLACE, degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
+  allreduce(MPI_IN_PLACE, degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
 
   return degrees;
 }
 
-// generate dense out degrees from graph, only keep degrees in this partition
+// generate dense degrees from graph, only keep degrees in this partition
 // std::vector is not a good option
 template <typename T, typename GRAPH>
 dense_state_t<T, typename GRAPH::partition_t> generate_dense_degrees_fg (
@@ -318,7 +318,7 @@ dense_state_t<T, typename GRAPH::partition_t> generate_dense_degrees_fg (
     size_t chunk_size = 1;
     while (graph.next_chunk(e_traversal, &chunk_size)) { }
   }
-  MPI_Allreduce(MPI_IN_PLACE, all_degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
+  allreduce(MPI_IN_PLACE, all_degrees.data(), graph_info.max_v_i_ + 1, get_mpi_data_type<T>(), MPI_SUM, MPI_COMM_WORLD);
 
   dense_state_t<T, partition_t> degrees(graph_info.max_v_i_, graph.partitioner());
 

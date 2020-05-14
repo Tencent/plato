@@ -27,6 +27,13 @@
 
 namespace plato {
 
+static void touch_dir(const std::string& path) {
+  if (!boost::filesystem::exists(path)) {
+      boost::filesystem::create_directories(path);
+  }
+  CHECK(boost::filesystem::is_directory(path));
+}
+
 fs_mt_omp_output_t::fs_mt_omp_output_t(const std::string& path, const std::string& prefix, bool compressed) {
   int threads = 0;
 
@@ -55,6 +62,7 @@ fs_mt_omp_output_t::fs_mt_omp_output_t(const std::string& path, const std::strin
       }
     }
   } else {
+    touch_dir(path);
     for (int i = 0; i < threads; ++i) {
       fs_output_v_[i].reset(new boost::iostreams::filtering_stream<boost::iostreams::output>());
       if (compressed) {
@@ -100,6 +108,7 @@ thread_local_fs_output::thread_local_fs_output(const std::string& path, const st
       fs_->hdfs_.reset(new hdfs_t::fstream(plato::hdfs_t::get_hdfs(filename), filename, true));
       fs_->os_.push(*fs_->hdfs_);
     } else {
+      touch_dir(path);
       namespace fs = boost::filesystem;
       if (fs::exists(filename)) {
         CHECK(fs::remove(filename)) << "failed to remove exist file: " << filename;

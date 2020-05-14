@@ -110,7 +110,7 @@ cc_test (
     srcs = [
         "intersection.cc",
     ],
-    copts = [ '-Wall', '-Werror', '-std=c++11', '-O3', '-mavx2', ] + PLATO_OPTS,
+    copts = [ '-Wall', '-std=c++11', '-O3', '-mavx2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",

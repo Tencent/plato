@@ -208,6 +208,12 @@ public:
    * @return max_vid_ ref
    */
   vid_t max_vid(void)        { return max_vid_;        }
+  
+  /**
+   * @brief type_counts getter
+   * @return 1
+   */
+  size_t type_counts(void)   { return 1;               }
 
   /**
    * @brief get_random_edge
@@ -329,7 +335,7 @@ int cbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(
   {
     bitmap_allocator_t __alloc(allocator_);
     auto* __p = __alloc.allocate(1);
-    __alloc.construct(__p, max_vid_ + 1);
+    __alloc.construct(__p, (size_t)max_vid_ + 1UL);
 
     bitmap_.reset(__p, [__alloc](bitmap_pointer p) mutable {
       __alloc.destroy(p);
@@ -377,8 +383,8 @@ int cbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(
 
   vid_t non_zero_lines = bitmap_->count();
   non_zero_lines_ = non_zero_lines;
-  bucket_size_ = (max_vid_ + 1 + non_zero_lines) / non_zero_lines;  //Set the bucket size to total rows divided by non-zero rows
-  vid_t bucket_num = (vid_t)(((uint64_t)max_vid_ + 1UL + bucket_size_) / bucket_size_); //The number of buckets
+  bucket_size_ = (vid_t)(((uint64_t)max_vid_ + 1UL + non_zero_lines) / non_zero_lines);  //Set the bucket size to total rows divided by non-zero rows
+  vid_t bucket_num = (vid_t)(((uint64_t)max_vid_ + 1UL + bucket_size_) / bucket_size_);  //The number of buckets
   vid_t tmp_bucket_num = bucket_num;
   vid_t tmp_non_zero_lines = non_zero_lines;
   watch.mark("t5");
@@ -417,7 +423,7 @@ int cbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_traversal(
   }
   watch.mark("t1");
   vid_t idx = 0;
-  size_t bm_size = plato::word_offset(max_vid_ + 1);
+  size_t bm_size = plato::word_offset((size_t)max_vid_ + 1UL);
   for (size_t i = 0; i <= bm_size; ++i) {
     if (bitmap_->data_[i]) {
       for (size_t b_i = 0; b_i < 64; ++b_i) {
@@ -576,7 +582,7 @@ typename cbcsr_t<EDATA, PART_IMPL, ALLOC>::adj_unit_list_spec_t cbcsr_t<EDATA, P
 
   adj_unit_list_spec_t neis;
   if (bitmap_->get_bit(v_i)) {
-    vid_t pos = max_vid_ + 1;
+    vid_t pos;
     vid_t my_bucket = v_i / bucket_size_;
     vid_t start = buckets_.get()[my_bucket];
     vid_t end = buckets_.get()[my_bucket + 1];
@@ -654,8 +660,10 @@ int cbcsr_t<EDATA, PART_IMPL, ALLOC>::load_from_cache(const graph_info_t& graph_
     auto traversal = [&](size_t, edge_unit_spec_t* edge) {
       send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
       if (false == graph_info.is_directed_) {
-        auto tmp = edge->src_; edge->src_ = edge->dst_; edge->dst_ = tmp;
-        send(partitioner_->get_partition_id(edge->src_, edge->dst_), *edge);
+        auto reversed_edge = *edge;
+        reversed_edge.src_ = edge->dst_;
+        reversed_edge.dst_ = edge->src_;
+        send(partitioner_->get_partition_id(edge->dst_, edge->src_), reversed_edge);
       }
       return true;
     };

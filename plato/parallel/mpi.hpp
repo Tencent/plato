@@ -45,6 +45,8 @@ Copyright (c) 2015-2016 Xiaowei Zhu, Tsinghua University
 #include "mpi.h"
 #include "glog/logging.h"
 
+#define MPI_MSG_MAX_SIZE 1073741824 
+
 namespace plato {
 
 enum MessageTag {
@@ -79,6 +81,58 @@ MPI_Datatype get_mpi_data_type() {
   } else {
     CHECK(false) << "type not supported";
   }
+}
+
+int bcast(void *buffer, size_t count, MPI_Datatype datatype, int root,
+    MPI_Comm comm) {  
+  //mpi_bcast will fail when message size large than 2GB
+  int type_size;
+  MPI_Type_size(datatype, &type_size);
+  size_t message_size = count * (size_t)type_size;
+  if (message_size >= MPI_MSG_MAX_SIZE) {
+    size_t max_count = MPI_MSG_MAX_SIZE / type_size;
+    for (size_t i = 0; i < count; i += max_count) {
+      size_t actual_count = max_count;
+      if (i + actual_count > count) {
+        actual_count = count - i;
+      }
+      auto ptr = (char*)buffer + i * (size_t)type_size;
+      int rc = MPI_Bcast(ptr, actual_count, datatype, root, comm);
+      if (rc != MPI_SUCCESS) return rc;
+    }
+  } else {
+    return MPI_Bcast(buffer, count, datatype, root, comm);
+  }
+
+  return MPI_SUCCESS;
+}
+
+int allreduce(const void *send_buf, void *recv_buf, size_t count,
+    MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+  //mpi_allreduce will fail when message size is too large
+  int type_size;
+  MPI_Type_size(datatype, &type_size);
+  size_t message_size = count * (size_t)type_size;
+  if (message_size >= MPI_MSG_MAX_SIZE) {
+    size_t max_count = MPI_MSG_MAX_SIZE / type_size;
+    for (size_t i = 0; i < count; i += max_count) {
+      size_t actual_count = max_count;
+      if (i + actual_count > count) {
+        actual_count = count - i;
+      }
+      auto ptr = send_buf;
+      if (ptr != MPI_IN_PLACE) {
+        ptr = (const char*)send_buf + i * (size_t)type_size;
+      }
+      int rc = MPI_Allreduce(ptr, (char*)recv_buf + i * (size_t)type_size, 
+          actual_count, datatype, op, comm);
+      if (rc != MPI_SUCCESS) return rc;
+    }
+  } else {
+    return MPI_Allreduce(send_buf, recv_buf, count, datatype, op, comm);
+  }
+
+  return MPI_SUCCESS;
 }
 
 }

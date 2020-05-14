@@ -73,28 +73,12 @@ int main(int argc, char** argv) {
   plato::algo::louvain_density_fast_unfolding_t<BCSR> louvain(graph, graph_info, opts);
   louvain.compute();
 
-  std::vector<plato::hdfs_t::fstream *> fsms;
-  using louvain_stream_t = boost::iostreams::filtering_stream<boost::iostreams::output>;
-  std::vector<louvain_stream_t*> fouts;
-  for (int tid = 0; tid < cluster_info.threads_; ++tid) {
-    char fn[FILENAME_MAX];
-    sprintf(fn, "%s/part-%05d.csv", FLAGS_output.c_str(),
-        (cluster_info.partition_id_ * cluster_info.threads_ + tid));
+  plato::thread_local_fs_output os(FLAGS_output, (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
 
-    plato::hdfs_t &fs = plato::hdfs_t::get_hdfs(fn);
-    fsms.emplace_back(new plato::hdfs_t::fstream(fs, fn, true));
-    fouts.emplace_back(new louvain_stream_t());
-    //fouts.back()->push(boost::iostreams::gzip_compressor());
-    fouts.back()->push(*fsms.back());
-    LOG(INFO) << fn << "\n";
-  }
-
-  louvain.save(fouts);
-
-  for (int i = 0; i < cluster_info.threads_; ++i) {
-    delete fouts[i];
-    delete fsms[i];
-  }
+  louvain.save([&] (plato::vid_t src, plato::vid_t label) {
+    auto& fs_output = os.local();
+    fs_output << src << "," << label << "\n";
+  });
 
   LOG(INFO) << "total cost: " << watch.show("t0") / 1000.0;
   return 0;

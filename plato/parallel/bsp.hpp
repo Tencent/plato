@@ -257,7 +257,8 @@ int bsp (
       MPI_Irecv(recv_buff[i].first.get(), recv_bytes, MPI_CHAR, i, MPI_ANY_TAG, opts.comm_, &requests_vec[i]);
     }
 
-    auto probe_once = [&](void) {
+    // to avoid gcc compiler bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=86969
+    auto probe_once = [&requests_vec, &recv_buff, &finished_count, &opts, max_recv_size, cache_size](void) {
       int  flag        = 0;
       int  index       = 0;
       int  recv_bytes  = 0;

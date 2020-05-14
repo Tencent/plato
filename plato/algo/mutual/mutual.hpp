@@ -184,7 +184,6 @@ size_t mutual(
       size_t   size_b = msg.msg_size_;
 
       T* out = (T*)out_buffer.local();
-      CHECK(size_a && size_b);
       size_t size_out = intersect(set_a, size_a, set_b, size_b, out);
       CHECK(size_out <= std::min(size_a, size_b))
       << boost::format("size_out: %lu, size_a: %lu, size_b: %lu. ") % size_out % size_a % size_b
@@ -198,7 +197,18 @@ size_t mutual(
   auto __send = [&] (bsp_send_callback_t<mutual_msg_t<T>> send) {
     mutual_msg_t<T> partition_msg[cluster_info.partitions_];
 
-    auto traversal = [&](vid_t v_i, const adj_unit_list_spec_t& /* adjs */) {
+    // to avoid gcc compiler bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=86969
+    auto traversal = [
+      &tcsr,
+      &partitions_mask,
+      &partitions_interchange_mask,
+      &mutual_intersect,
+      &partition_msg,
+      &cluster_info,
+      &send,
+      &partitioner,
+      &extract_neis
+    ](vid_t v_i, const adj_unit_list_spec_t& /* adjs */) {
       auto& v_src = tcsr[v_i];
 
       T *msg_begin, *msg_end;

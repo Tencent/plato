@@ -74,7 +74,7 @@ cc_binary (
     srcs = [
         "convolve.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",
@@ -96,7 +96,7 @@ cc_binary (
     srcs = [
         "mpi_multi_comm.cc",
     ],
-    copts = ['-g', '-O2', '-Werror', ] + PLATO_OPTS,
+    copts = ['-g', '-O2', ] + PLATO_OPTS,
     linkopts = [ ] + PLATO_OPTS,
     deps = [
         "//3rd/glog:glog",

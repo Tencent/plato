@@ -1,0 +1,19 @@
+# Ubuntu 16.04 Trusty support
+sudo: required
+dist: xenial
+
+language: cpp
+before_install:
+    - sudo apt-get update
+    - sudo ./docker/install-dependencies.sh
+    - ./3rdtools.sh distclean
+    - ./3rdtools.sh install > /dev/null
+script:
+    - ./build.sh
+notifications:
+    email: true
+branches:
+  only:
+  - /.*/
+
+
