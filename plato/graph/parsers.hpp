@@ -259,7 +259,7 @@ ssize_t csv_parser(STREAM_T& fin, blockcallback_t<EdgeData, VID_T> callback, dec
     }
 
     auto dst = strtoul(pToken, nullptr, 10);
-    CHECK(dst <= std::numeric_limits<VID_T>::max()) << "dst: " << src << " exceed max value";
+    CHECK(dst <= std::numeric_limits<VID_T>::max()) << "dst: " << dst << " exceed max value";
     buffer[count].dst_ = dst;
 
     if (3 == valid_splits) {
