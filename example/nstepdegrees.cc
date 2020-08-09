@@ -97,13 +97,28 @@ void work_flow(dualmode_engine_t<dcsc_spec_t, bcsr_spec_t>* engine, const graph_
   auto& cluster_info = plato::cluster_info_t::get_instance();
   plato::algo::nstepdegrees_t<dcsc_spec_t, bcsr_spec_t, BitWidth> nstepdegrees(engine, graph_info, actives_v, opts);
   nstepdegrees.compute(graph.second, graph.first);
+  std::vector<plato::hdfs_t::fstream *> fsms;
+  using nstepdegrees_stream_t = boost::iostreams::filtering_stream<boost::iostreams::output>;
+  std::vector<nstepdegrees_stream_t*> fouts;
+  for (int tid = 0; tid < cluster_info.threads_; ++tid) {
+    char fn[FILENAME_MAX];
+    sprintf( fn, "%s/part-%05d.csv.gz", FLAGS_output.c_str(),
+        (cluster_info.partition_id_ * cluster_info.threads_ + tid));
+    
+    plato::hdfs_t &fs = plato::hdfs_t::get_hdfs(fn);
+    fsms.emplace_back(new plato::hdfs_t::fstream(fs, fn, true));
+    fouts.emplace_back(new nstepdegrees_stream_t());
+    fouts.back()->push(boost::iostreams::gzip_compressor());
+    fouts.back()->push(*fsms.back());
+    LOG(INFO) << fn << "\n";
+  }
 
-  plato::thread_local_fs_output os(FLAGS_output, (boost::format("%04d_") % cluster_info.partition_id_).str(), true);
+  nstepdegrees.save(fouts);
 
-  nstepdegrees.save([&] (plato::vid_t v_i, plato::vid_t in, plato::vid_t out) {
-    auto& fs_output = os.local();
-    fs_output << v_i << "," << in <<","<< out << "\n";
-  });
+  for (int i = 0; i < cluster_info.threads_; ++i) {
+    delete fouts[i];
+    delete fsms[i];
+  }
 }
 
 int main(int argc, char** argv) {
