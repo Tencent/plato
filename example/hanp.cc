@@ -39,12 +39,12 @@
 
 DEFINE_string(input,       "",      "input file, in csv format, without edge data");
 DEFINE_string(output,      "",      "output directory");
-DEFINE_bool(is_directed,   true,   "is graph directed or not");
+DEFINE_bool(is_directed,   true,    "is graph directed or not");
 DEFINE_bool(part_by_in,    true,    "partition by in-degree");
 DEFINE_int32(alpha,        -1,      "alpha value used in sequence balance partition");
 DEFINE_uint32(iterations,  20,      "number of iterations");
-DEFINE_double(preference, 1.0,      "is any arbitrary comparable characteristic for any node");
-DEFINE_double(hop_att,    0.1,      "a new attenuated score");
+DEFINE_double(preference,  1.0,     "is any arbitrary comparable characteristic for any node");
+DEFINE_double(hop_att,     0.1,     "a new attenuated score");
 
 bool string_not_empty(const char*, const std::string& value) {
   if (0 == value.length()) { return false; }

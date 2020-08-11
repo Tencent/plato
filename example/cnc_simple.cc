@@ -34,11 +34,11 @@
 #include "plato/algo/cnc/closeness.hpp"
 
 DEFINE_string(input,       "",     "input file, in csv format, without edge data");
-DEFINE_string(output,       "",     "output directory, store the closeness result");
+DEFINE_string(output,      "",     "output directory, store the closeness result");
 DEFINE_bool(is_directed,   false,  "is graph directed or not");
 DEFINE_int32(alpha,        -1,     "alpha value used in sequence balance partition");
 DEFINE_bool(part_by_in,    false,  "partition by in-degree");
-DEFINE_int32(num_samples, 10, "number of nodes to test");
+DEFINE_int32(num_samples,  10,     "number of nodes to test");
 
 void init(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);

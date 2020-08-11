@@ -30,7 +30,7 @@
 #include "plato/algo/tree_stat/tree_stat.hpp"
 
 DEFINE_string(input,       "",     "input file, in csv format, without edge data");
-DEFINE_string(output,    "",  "result file");
+DEFINE_string(output,      "",     "result file");
 
 DEFINE_uint64(vertices,   0,  "vertex count");
 DEFINE_uint64(edges,      0,  "edge count");
