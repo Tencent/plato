@@ -34,8 +34,8 @@ DEFINE_string(input,         "",     "input file, in csv format, without edge da
 DEFINE_bool(is_directed,     false,  "is graph directed or not");
 DEFINE_int32(alpha,          -1,     "alpha value used in sequence balance partition");
 DEFINE_bool(part_by_in,      false,  "partition by in-degree");
-DEFINE_bool(src_need_encode, true, "");
-DEFINE_bool(dst_need_encode, true, "");
+DEFINE_bool(src_need_encode, true,   "");
+DEFINE_bool(dst_need_encode, true,   "");
 
 void init(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);

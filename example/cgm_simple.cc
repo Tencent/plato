@@ -34,7 +34,7 @@
 #include "plato/algo/cgm/connected_component.hpp"
 
 DEFINE_string(input,         "",     "input file, in csv format, without edge data");
-DEFINE_string(output,         "",     "output directory, store the closeness result");
+DEFINE_string(output,        "",     "output directory, store the closeness result");
 DEFINE_bool(is_directed,     false,  "is graph directed or not");
 DEFINE_int32(alpha,          -1,     "alpha value used in sequence balance partition");
 DEFINE_int32(label,          -1,     "");
