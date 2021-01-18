@@ -86,7 +86,7 @@ dense_state_t<double, typename GRAPH::partition_t> weighted_pagerank (
   {
     auto e_traversal = [&](vid_t v_i, const adj_unit_list_spec_t& adjs) {
       for (auto it = adjs.begin_; it != adjs.end_; it++) {
-        plato::cas(&v_weight_sum[it->neighbour_], v_weight_sum[it->neighbour_], v_weight_sum[it->neighbour_] + it->edata_);
+        write_add(&v_weight_sum[it->neighbour_], it->edata_);
       }
       return true;
     };
