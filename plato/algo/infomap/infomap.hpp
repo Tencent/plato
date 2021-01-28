@@ -386,24 +386,15 @@ void infomap_t<VID_T>::compute() {
 template<typename VID_T>
 void infomap_t<VID_T>::output() {
   auto& cluster_info = cluster_info_t::get_instance();
-  std::vector<std::unique_ptr<plato::hdfs_t::fstream>> fs_v(cluster_info.threads_);
-  std::vector<std::unique_ptr<boost::iostreams::filtering_stream<
-    boost::iostreams::output>>>fs_output_v(cluster_info.threads_);
 
-  for (int i = 0; i < cluster_info.threads_; ++i) {
-    fs_v[i].reset(new plato::hdfs_t::fstream(plato::hdfs_t::get_hdfs(
-            opts_.output_), (boost::format("%s/%04d_%04d.csv") %
-              opts_.output_.c_str() % cluster_info.partition_id_ % i).str(), true));
-    fs_output_v[i].reset(new boost::iostreams::filtering_stream<
-        boost::iostreams::output>());
-    fs_output_v[i]->push(*fs_v[i]);
-  }
-  
+  fs_mt_omp_output_t fs_out_stream(opts_.output_, (boost::format("%04d") % cluster_info.partition_id_).str(), false);
+
   vid_t v_start = part_bcsr_->offset_[cluster_info.partition_id_];
   #pragma omp parallel num_threads(cluster_info.threads_)
   {
     int thread_id = omp_get_thread_num();
     int thread_num = omp_get_num_threads();
+    auto& fs_output = fs_out_stream.ostream(thread_id);
     for (vid_t i = thread_id; i < (size_t)local_labels_.size(); 
         i += thread_num) {
       vid_t vid = v_start + i;
@@ -412,7 +403,7 @@ void infomap_t<VID_T>::output() {
         vid = data_encoder_.decode(vid);
         fa = data_encoder_.decode(fa);
       }
-      *(fs_output_v[thread_id]) << vid << ',' << fa << "\n";
+      fs_output << vid << ',' << fa << "\n";
     }
   }
 
