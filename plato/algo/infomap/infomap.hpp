@@ -36,6 +36,14 @@
 #include <parallel/algorithm>
 
 namespace plato { namespace algo {
+/*
+ * reference:
+ *  [1] Rosvall M, Bergstrom C T. Maps of random walks on complex networks reveal community structure[J]. 
+ *      Proceedings of the National Academy of Sciences, 2008, 105(4): 1118-1123.
+ *  [2] Rosvall M, Axelsson D, Bergstrom C T. The map equation[J]. 
+ *      The European Physical Journal Special Topics, 2009, 178(1): 13-23.
+ * 
+ **/
 
 struct infomap_opts_t {
   std::string input_ = "";
