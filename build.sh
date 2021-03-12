@@ -5,7 +5,7 @@ set -ex
 ROOT_DIR=$(realpath $(dirname $0))
 cd $ROOT_DIR
 
-if [ $1 == "clean" ]; then
+if [[ $1 == "clean" ]]; then
     bazel clean
     ./3rdtools.sh distclean
     ./3rdtools.sh install
