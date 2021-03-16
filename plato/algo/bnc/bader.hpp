@@ -154,14 +154,17 @@ bader_betweenness_t<INCOMING, OUTGOING, T>::bader_betweenness_t(
   cc_ = new connected_component_t<INCOMING, OUTGOING>(engine, graph_info);
   cc_->compute();
   major_component_label_ = cc_->get_major_label();
-  major_component_vertices_ = cc_->get_major_vertices();
-  constant_ = opts.constant_;
-  sum_dependence_max_ = constant_ * major_component_vertices_;
-  if (opts.max_iteration_ == 0) {
-    max_iteration_ = major_component_vertices_;
-  } else {
-    max_iteration_ = opts.max_iteration_;
-  }
+  // major_component_vertices_ = cc_->get_major_vertices();
+
+  // auto components_info_ = cc_->get_components_info();
+  
+  // constant_ = opts.constant_;
+  // sum_dependence_max_ = constant_ * major_component_vertices_;
+  // if (opts.max_iteration_ == 0) {
+  //   max_iteration_ = major_component_vertices_;
+  // } else {
+  //   max_iteration_ = opts.max_iteration_;
+  // }
 
   active_all_.fill();
 
@@ -201,7 +204,23 @@ bader_betweenness_t<INCOMING, OUTGOING, T>::bader_betweenness_t(
   }
   else {
     chosen_ = opts.chosen_;
+    major_component_label_ = global_labels_[chosen_];
   }
+
+  
+
+  auto components_info_ = cc_->get_components_info();
+  major_component_vertices_ = components_info_->find(major_component_label_)->second.vertices_;
+  
+  constant_ = opts.constant_;
+  sum_dependence_max_ = constant_ * major_component_vertices_;
+  if (opts.max_iteration_ == 0) {
+    max_iteration_ = major_component_vertices_;
+  } else {
+    max_iteration_ = opts.max_iteration_;
+  }
+
+  LOG(INFO) << "chosen " << chosen_ << " major component label " << major_component_label_ << " global_labels_[chosen_] " << global_labels_[chosen_];
 
 }
 
@@ -237,8 +256,12 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
   auto active_view_all = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), active_all_);
   auto accumulate = [&](const betweenness_state_t* dependencies, vid_t root) {
     active_view_all.template foreach<vid_t>([&](vid_t v_i){
+      LOG(INFO) << "root " << root << " dependence of " << v_i << " " << (*dependencies)[v_i];
       if (v_i != root) {
         T d = (*dependencies)[v_i];
+        // for debug
+        // if(d > 0) 
+        //   LOG(INFO) << "dependence of " << v_i << " " << d;
         betweenness_[v_i] += d;
         if (v_i == chosen_) {
           sum_dependence_ += d;
@@ -266,7 +289,7 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
     auto root = gen_next_vertex();
     LOG(INFO) << "next root: " << root << std::endl;
     epoch(root, accumulate);
-    LOG_IF(INFO, !cluster_info.partition_id_ && (iter + 1) % 10 == 0)
+    LOG_IF(INFO, !cluster_info.partition_id_)
     << boost::format("iter=%u/%u, sum_dependence[%u]=%.1f/%.1f\n") % (iter + 1) % max_iteration_ % chosen_ % sum_dependence_ % sum_dependence_max_;
   }
 
@@ -288,6 +311,7 @@ T bader_betweenness_t<INCOMING, OUTGOING, T>::get_betweenness_of(vid_t v_i) cons
 template <typename INCOMING, typename OUTGOING, typename T>
 void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
   vid_t root, std::function<void(const betweenness_state_t*, vid_t)> post_proc) {
+
   std::vector<active_subset_t*> levels;
   auto active_current = new active_subset_t(graph_info_.max_v_i_ + 1);
   auto visited = engine_->alloc_v_subset();
@@ -357,10 +381,12 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
   dependencies_.fill((T)0.0);
   visited.clear();
   while (levels.size() > 0) {
+    LOG(INFO) << "current level " << levels.size();
     auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), *(levels.back()));
     actives = active_view.template foreach<vid_t> ([&](vid_t v_i) {
       visited.set_bit(v_i); return 1;
     });
+
     engine_->template foreach_edges<bader_msg_type_t, vid_t> (
       [&](const push_context_t& context, vid_t v_i) {
         T value = (dependencies_[v_i] + 1.0) / num_paths_[v_i];
