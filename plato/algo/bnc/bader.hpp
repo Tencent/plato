@@ -110,7 +110,7 @@ public:
    * @brief
    * @return
    */
-  vid_t get_major_componnent_vertices() const { return major_component_vertices_; }
+  vid_t get_componnent_vertices() const { return component_vertices_; }
 
 private:
   /**
@@ -134,8 +134,8 @@ private:
   std::unordered_set<vid_t> samples_;
   connected_component_t<INCOMING, OUTGOING> *cc_;
   label_state_t global_labels_;
-  vid_t major_component_label_;
-  vid_t major_component_vertices_;
+  vid_t component_label_;
+  vid_t component_vertices_;
   active_subset_t active_all_;
 };
 
@@ -153,18 +153,6 @@ bader_betweenness_t<INCOMING, OUTGOING, T>::bader_betweenness_t(
     active_all_(graph_info.max_v_i_ + 1) {
   cc_ = new connected_component_t<INCOMING, OUTGOING>(engine, graph_info);
   cc_->compute();
-  major_component_label_ = cc_->get_major_label();
-  // major_component_vertices_ = cc_->get_major_vertices();
-
-  // auto components_info_ = cc_->get_components_info();
-  
-  // constant_ = opts.constant_;
-  // sum_dependence_max_ = constant_ * major_component_vertices_;
-  // if (opts.max_iteration_ == 0) {
-  //   max_iteration_ = major_component_vertices_;
-  // } else {
-  //   max_iteration_ = opts.max_iteration_;
-  // }
 
   active_all_.fill();
 
@@ -194,33 +182,32 @@ bader_betweenness_t<INCOMING, OUTGOING, T>::bader_betweenness_t(
 
   //get chosen vertex
   if (opts.chosen_ == -1) {
+    component_label_ = cc_->get_major_label();
     if (cluster_info.partition_id_ == 0) {
       do {
         chosen_ = rand() % graph_info.vertices_;
-      } while (global_labels_[chosen_] != major_component_label_);
+      } while (global_labels_[chosen_] != component_label_);
     }
     MPI_Bcast(&chosen_, 1, get_mpi_data_type<vid_t>(), 0, MPI_COMM_WORLD);
     LOG(INFO) << "chosen: "  << chosen_ << std::endl;
   }
   else {
     chosen_ = opts.chosen_;
-    major_component_label_ = global_labels_[chosen_];
+    component_label_ = global_labels_[chosen_];
   }
 
   
 
   auto components_info_ = cc_->get_components_info();
-  major_component_vertices_ = components_info_->find(major_component_label_)->second.vertices_;
+  component_vertices_ = components_info_->find(component_label_)->second.vertices_;
   
   constant_ = opts.constant_;
-  sum_dependence_max_ = constant_ * major_component_vertices_;
+  sum_dependence_max_ = constant_ * component_vertices_;
   if (opts.max_iteration_ == 0) {
-    max_iteration_ = major_component_vertices_;
+    max_iteration_ = component_vertices_;
   } else {
     max_iteration_ = opts.max_iteration_;
   }
-
-  LOG(INFO) << "chosen " << chosen_ << " major component label " << major_component_label_ << " global_labels_[chosen_] " << global_labels_[chosen_];
 
 }
 
@@ -244,7 +231,7 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
       size_t curr_size = samples_.size();
       do {
         nxt = std::rand() % graph_info_.vertices_;
-        if (global_labels_[nxt] == major_component_label_) {
+        if (global_labels_[nxt] == component_label_) {
           samples_.insert(nxt);
         }
       } while (curr_size == samples_.size());
@@ -256,12 +243,8 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
   auto active_view_all = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), active_all_);
   auto accumulate = [&](const betweenness_state_t* dependencies, vid_t root) {
     active_view_all.template foreach<vid_t>([&](vid_t v_i){
-      LOG(INFO) << "root " << root << " dependence of " << v_i << " " << (*dependencies)[v_i];
       if (v_i != root) {
         T d = (*dependencies)[v_i];
-        // for debug
-        // if(d > 0) 
-        //   LOG(INFO) << "dependence of " << v_i << " " << d;
         betweenness_[v_i] += d;
         if (v_i == chosen_) {
           sum_dependence_ += d;
@@ -277,7 +260,7 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
 
   auto update_betweenness = [&](vid_t sample_size) {
     active_view_all.template foreach<vid_t>([&](vid_t v_i) {
-      betweenness_[v_i] = major_component_vertices_ * betweenness_[v_i] / sample_size;
+      betweenness_[v_i] = component_vertices_ * betweenness_[v_i] / sample_size;
       if (std::isnan(betweenness_[v_i])) {
         betweenness_[v_i] = 0;
       }
