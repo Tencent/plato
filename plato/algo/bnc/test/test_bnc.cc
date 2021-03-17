@@ -182,7 +182,7 @@ TEST(betweenness, bader) {
   LOG(INFO) << "sample size: " << bader.get_samples()->size() << std::endl;
   std::vector<double> betweenness(max_vid + 1, 0.0);
   //we already know the samples through bader algorithm, so just calc it
-  calc(g, max_vid + 1, bader.get_major_componnent_vertices(), bader.get_samples(), betweenness); 
+  calc(g, max_vid + 1, bader.get_componnent_vertices(), bader.get_samples(), betweenness); 
   
   //use brute force to check
   for (int i = 0; i <= max_vid; ++i) {
