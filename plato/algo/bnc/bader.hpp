@@ -272,7 +272,7 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::compute() {
     auto root = gen_next_vertex();
     LOG(INFO) << "next root: " << root << std::endl;
     epoch(root, accumulate);
-    LOG_IF(INFO, !cluster_info.partition_id_)
+    LOG_IF(INFO, !cluster_info.partition_id_ && (iter + 1) % 10 == 0)
     << boost::format("iter=%u/%u, sum_dependence[%u]=%.1f/%.1f\n") % (iter + 1) % max_iteration_ % chosen_ % sum_dependence_ % sum_dependence_max_;
   }
 
@@ -364,7 +364,6 @@ void bader_betweenness_t<INCOMING, OUTGOING, T>::epoch(
   dependencies_.fill((T)0.0);
   visited.clear();
   while (levels.size() > 0) {
-    LOG(INFO) << "current level " << levels.size();
     auto active_view = plato::create_active_v_view(engine_->out_edges()->partitioner()->self_v_view(), *(levels.back()));
     actives = active_view.template foreach<vid_t> ([&](vid_t v_i) {
       visited.set_bit(v_i); return 1;
