@@ -133,7 +133,7 @@ public:
    * @param ss
    */
   template<typename STREAM>
-  void save(std::vector<STREAM*>& ss);
+  void save(STREAM& ss);
 
   /**
    * @brief
@@ -444,7 +444,7 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::compute(INCOMING& in_edges, O
 
 template<typename INCOMING, typename OUTGOING, uint32_t BitWidth>
 template<typename STREAM>
-void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(std::vector<STREAM*>& ss) {
+void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(STREAM & ss) {
   if(engine_->is_reversed()) {
     engine_->reverse();
   }
@@ -457,19 +457,19 @@ void nstepdegrees_t<INCOMING, OUTGOING, BitWidth>::save(std::vector<STREAM*>& ss
   LOG_IF(FATAL, !que.is_lock_free())
   << "boost::lockfree::queue is not lock free\n";
   std::atomic<bool> done(false);
-  std::thread pop_write([&done, &ss, &que](void) {
-#pragma omp parallel num_threads(ss.size())
+  std::thread pop_write([&done, &ss, &que, &cluster_info](void) {
+#pragma omp parallel num_threads(cluster_info.threads_)
     {
-      int tid = omp_get_thread_num();
+      // int tid = omp_get_thread_num();
       nstepdegrees_with_vid_t degree;
       while(!done) {
         if(que.pop(degree)) {
-          *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
+          ss.ostream() << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
         }
       }
 
       while(que.pop(degree)) {
-        *ss[tid] << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
+        ss.ostream() << degree.v_i << "," << degree.in_ <<","<< degree.out_ << "\n";
       }
     }
   });
