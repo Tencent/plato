@@ -191,7 +191,7 @@ struct cluster_info_t {  // user should keep this struct alive during whole proc
       }
     }
 
-    if (0 != FLAGS_threads) {
+    if (0 < FLAGS_threads) {
       threads_ = FLAGS_threads;
     } else if (nullptr != std::getenv("OMP_NUM_THREADS")) {
       threads_ = (int)std::strtol(std::getenv("OMP_NUM_THREADS"), nullptr, 10);
