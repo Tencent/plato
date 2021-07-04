@@ -55,7 +55,7 @@ function install_bazel() {
 
 if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
     apt-get install -y "${debian_packages[@]}"
-elif [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] || [ "$ID" = "tlinux" ]; then
+elif [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] || [ "$ID" = "tlinux" ] || [ "$ID" = "amzn" ]; then
     if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "8" ]; then # centos 8
         dnf --enablerepo=PowerTools install -y "${redhat_packages[@]}"
     else
