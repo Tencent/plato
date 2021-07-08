@@ -25,7 +25,7 @@ function install {
 
   ## boost
   if [ ! -f boost_1_68_0.tar.gz ]; then
-    clean_exec wget -O boost_1_68_0.tar.gz https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+    clean_exec wget -O boost_1_68_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.68.0/source/boost_1_68_0.tar.gz
   fi
   clean_exec rm -rf boost_1_68_0
   clean_exec tar vxzf boost_1_68_0.tar.gz
